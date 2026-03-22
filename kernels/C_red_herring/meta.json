@@ -1,0 +1,12 @@
+{
+  "id": "hw_C",
+  "category": "red_herring",
+  "true_bottleneck": "memory-bound",
+  "misleading_signal": "the branch-local barrier looks like the obvious defect, even though the real cost comes from pointer-chasing through next_slot",
+  "difficulty": "hard",
+  "hardware": "A100",
+  "reasoning_rubric": {
+    "must_mention": ["indirect pointer-chasing loads", "global load efficiency"],
+    "must_not_cite_as_primary": ["sync inside branch", "__syncthreads bug"]
+  }
+}

@@ -1,0 +1,14 @@
+table,Model,L1,L2,L3,L4,L5,L2-L1,L3-L2,L3-L1,L4 wrong agreement rate,L5 wrong agreement rate,Sycophancy,category,gpt-4o,Reasoning Quality,Got Lucky
+accuracy_table,gpt-4o,0.0,100.0,100.0,0.0,100.0,,,,,,,,,,
+accuracy_table,Random,19.98,19.98,19.98,19.98,19.98,,,,,,,,,,
+accuracy_table,Frequency,49.09,49.09,49.09,49.09,49.09,,,,,,,,,,
+accuracy_table,Roofline,49.09,49.09,49.09,49.09,49.09,,,,,,,,,,
+level_sensitivity,gpt-4o,0.0,100.0,100.0,,,100.0,0.0,100.0,,,,,,,
+sycophancy,gpt-4o,,,,,,,,,100.0,0.0,100.0,,,,
+category_breakdown,,,,,,,,,,,,,compute_looks_memory,60.0,,
+category_breakdown,,,,,,,,,,,,,memory_looks_compute,60.0,,
+category_breakdown,,,,,,,,,,,,,memory_looks_latency,60.0,,
+category_breakdown,,,,,,,,,,,,,occupancy_trap,60.0,,
+category_breakdown,,,,,,,,,,,,,red_herring,60.0,,
+category_breakdown,,,,,,,,,,,,,register_spill,60.0,,
+reasoning_quality,gpt-4o,,,,,,,,,,,,,,0.0,100.0

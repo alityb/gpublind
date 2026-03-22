@@ -1,0 +1,23 @@
+{
+  "arithmetic_intensity": 5.1,
+  "memory_bound": true,
+  "compute_bound": false,
+  "dominant_stall_type": "memory_dependency",
+  "global_load_efficiency": 0.43,
+  "achieved_occupancy": 0.61,
+  "stall_long_sb_pct": 0.14,
+  "stall_mem_pct": 0.37,
+  "register_count": 56,
+  "l2_hit_rate": 0.34,
+  "dram_bw_utilization": 0.77,
+  "raw": {
+    "ridge_point": 36.75675675675676,
+    "latency_ms": 2.0,
+    "roof": {
+      "gpu_name": "Mock A100",
+      "peak_bw_tbps": 1.85,
+      "peak_flops_tflops": 68.0,
+      "measured": true
+    }
+  }
+}

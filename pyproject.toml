@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gpublind"
+version = "0.1.0"
+description = "GPUBlind benchmark for evaluating GPU bottleneck diagnosis reasoning"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "datasets",
+  "litellm",
+  "jinja2",
+  "pandas",
+  "numpy",
+  "pytest",
+]
+
+[tool.setuptools]
+include-package-data = true
+packages = ["data", "registry", "profiles", "eval"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

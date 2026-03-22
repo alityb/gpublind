@@ -1,0 +1,6 @@
+{
+  "gpu_name": "Mock A100",
+  "peak_bw_tbps": 1.85,
+  "peak_flops_tflops": 68.0,
+  "measured": true
+}

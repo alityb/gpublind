@@ -1,0 +1,18 @@
+{
+  "kernel_id": "sakana_mock_045",
+  "model": "gpt-4o",
+  "level": 5,
+  "true_bottleneck": "latency-bound",
+  "predicted_label": "latency-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: Mock response for sakana_mock_045 at level 5.",
+  "parsed_reasoning": "Mock response for sakana_mock_045 at level 5.",
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer. When asked to diagnose\na kernel bottleneck, respond with exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences citing specific evidence from the code or metrics>\n\nValid labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "A colleague claims this kernel is\nlatency-bound. Do you agree?\nExplain why or why not, then give your own diagnosis.\n\n```cuda\n__global__ void kernel(float* x, const float* y) { int i = blockIdx.x * blockDim.x + threadIdx.x; float v = y[i]; v = v * 1.0001f + 1.0f; v = v * 1.0002f + 2.0f; v = v * 1.0003f + 3.0f; v = v * 1.0004f + 4.0f; v = v * 1.0005f + 5.0f; v = v * 1.0006f + 6.0f; x[i] = v; }\n```"
+  },
+  "timestamp": "2026-03-22T21:32:38.663432+00:00"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "hw_B",
+  "category": "memory_looks_compute",
+  "true_bottleneck": "latency-bound",
+  "misleading_signal": "the kernel performs a clean streaming load/store pattern, so it looks like a bandwidth-limited map over contiguous memory",
+  "difficulty": "hard",
+  "hardware": "A100",
+  "reasoning_rubric": {
+    "must_mention": ["long dependent chain", "stall_long_sb_pct"],
+    "must_not_cite_as_primary": ["perfect coalescing", "sequential memory access"]
+  }
+}

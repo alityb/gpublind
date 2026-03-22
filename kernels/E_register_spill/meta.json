@@ -1,0 +1,12 @@
+{
+  "id": "hw_E",
+  "category": "register_spill",
+  "true_bottleneck": "register-spill",
+  "misleading_signal": "the kernel reads contiguous windows from two arrays and looks like a straightforward streaming filter, but the real issue is excessive per-thread state",
+  "difficulty": "hard",
+  "hardware": "A100",
+  "reasoning_rubric": {
+    "must_mention": ["register count per thread", "local-memory spill traffic"],
+    "must_not_cite_as_primary": ["contiguous global loads", "streaming memory pattern"]
+  }
+}

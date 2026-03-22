@@ -1,0 +1,12 @@
+{
+  "id": "hw_D",
+  "category": "occupancy_trap",
+  "true_bottleneck": "occupancy-limited",
+  "misleading_signal": "the 32x32 shared-memory staging looks like deliberate textbook tiling, but the staged buffers quietly consume enough SM resources to crush occupancy",
+  "difficulty": "hard",
+  "hardware": "A100",
+  "reasoning_rubric": {
+    "must_mention": ["shared memory allocation per block", "achieved occupancy"],
+    "must_not_cite_as_primary": ["32x32 tiling", "L1 reuse optimization"]
+  }
+}

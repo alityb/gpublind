@@ -1,0 +1,12 @@
+{
+  "id": "hw_A",
+  "category": "compute_looks_memory",
+  "true_bottleneck": "memory-bound",
+  "misleading_signal": "the traversal and tile comment make the access pattern look cache-friendly, while the kernel spends many arithmetic ops per fetched element",
+  "difficulty": "hard",
+  "hardware": "A100",
+  "reasoning_rubric": {
+    "must_mention": ["effective stride hidden in edge_slot", "global load efficiency"],
+    "must_not_cite_as_primary": ["high FLOP count", "inner-loop arithmetic density"]
+  }
+}

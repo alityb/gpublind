@@ -1,0 +1,18 @@
+{
+  "kernel_id": "sakana_mock_008",
+  "model": "gpt-4o",
+  "level": 1,
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "compute-bound",
+  "correct": false,
+  "severity": 2,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: compute-bound\nREASONING: Mock response for sakana_mock_008 at level 1.",
+  "parsed_reasoning": "Mock response for sakana_mock_008 at level 1.",
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer. When asked to diagnose\na kernel bottleneck, respond with exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences citing specific evidence from the code or metrics>\n\nValid labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n__global__ void kernel(float* x, const float* y) { int i = blockIdx.x * blockDim.x + threadIdx.x; float v = y[(i * 17) & 4095]; for (int j = 0; j < 8; ++j) { v = v * 1.1f + x[(i + j * 257) & 4095]; } x[i] = v; }\n```"
+  },
+  "timestamp": "2026-03-22T21:32:38.633715+00:00"
+}
