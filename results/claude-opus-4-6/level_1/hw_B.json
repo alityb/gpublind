@@ -1,0 +1,18 @@
+{
+  "kernel_id": "hw_B",
+  "model": "claude-opus-4-6",
+  "level": 1,
+  "true_bottleneck": "latency-bound",
+  "predicted_label": "memory-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: memory-bound\nREASONING: Mock response for hw_B at level 1.",
+  "parsed_reasoning": "Mock response for hw_B at level 1.",
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer. When asked to diagnose\na kernel bottleneck, respond with exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences citing specific evidence from the code or metrics>\n\nValid labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void feature_transform(const float* in, float* out, int n) {\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    if (tid >= n) {\n        return;\n    }\n\n    float sample = in[tid];\n    float centered = sample - 0.125f;\n    float energy = centered * centered + 0.03125f;\n    float scaled = energy * 1.125f + 0.5f;\n    float normalized = centered / (scaled + 0.25f);\n    float corrected = normalized * (1.0f + scaled * 0.0625f);\n    float damped = corrected / (1.0f + corrected * corrected * 0.5f);\n    float fused = damped * 1.03125f + scaled * 0.015625f;\n    float refined = fused / (1.0f + fused * 0.25f);\n    out[tid] = refined;\n}\n\nint main() {\n    const int n = 1 << 20;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float* h = new float[n];\n    float *in, *out;\n    cudaMalloc(&in, bytes);\n    cudaMalloc(&out, bytes);\n    for (int i = 0; i < n; ++i) {\n        h[i] = static_cast<float>(i % 97) * 0.03125f;\n    }\n    cudaMemcpy(in, h, bytes, cudaMemcpyHostToDevice);\n    feature_transform<<<(n + 255) / 256, 256>>>(in, out, n);\n    cudaMemcpy(h, out, bytes, cudaMemcpyDeviceToHost);\n    std::printf(\"%f\\n\", h[1]);\n    cudaFree(in);\n    cudaFree(out);\n    delete[] h;\n    return 0;\n}\n\n```"
+  },
+  "timestamp": "2026-03-22T22:09:31.924560+00:00"
+}

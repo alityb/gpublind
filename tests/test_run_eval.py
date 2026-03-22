@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -60,7 +61,7 @@ def test_call_model_retries_rate_limit_then_succeeds() -> None:
         return Response("BOTTLENECK: memory-bound\nREASONING: recovered")
 
     raw_response, api_error = call_model(
-        model_name="gpt-4o",
+        model_name="gpt-5.4",
         rendered_prompt={"system": "s", "user": "u"},
         mock=False,
         entry=SimpleNamespace(id="kernel_x"),
@@ -88,7 +89,7 @@ def test_dry_run_prints_cost_estimate_and_writes_no_results(tmp_path: Path, caps
     exit_code = main(
         [
             "--model",
-            "gpt-4o",
+            "gpt-5.4",
             "--mock",
             "--dry-run",
             "--mined",
@@ -109,3 +110,62 @@ def test_dry_run_prints_cost_estimate_and_writes_no_results(tmp_path: Path, caps
     assert "Estimated cost:" in captured.out
     assert "Total calls:" in captured.out
     assert not output_dir.exists()
+
+
+def test_run_eval_uses_real_profile_jsons_with_mock_llm(tmp_path: Path) -> None:
+    profiles_dir = tmp_path / "profiles"
+    output_dir = tmp_path / "results"
+    write_mock_fixtures(profiles_dir)
+    for fixture_path in (profiles_dir / "fixtures").glob("*.json"):
+        shutil.copy(fixture_path, profiles_dir / fixture_path.name)
+
+    exit_code = main(
+        [
+            "--model",
+            "gpt-5.4",
+            "--mock-llm",
+            "--levels",
+            "1",
+            "--filter",
+            "source=handwritten",
+            "--kernels",
+            "kernels",
+            "--profiles",
+            str(profiles_dir),
+            "--output",
+            str(output_dir),
+        ]
+    )
+
+    assert exit_code == 0
+    result_files = list((output_dir / "gpt-5.4" / "level_1").glob("*.json"))
+    assert len(result_files) == 5
+
+
+def test_run_eval_supports_mock_profiles_and_mock_llm(tmp_path: Path) -> None:
+    profiles_dir = tmp_path / "profiles"
+    output_dir = tmp_path / "results"
+    write_mock_fixtures(profiles_dir)
+
+    exit_code = main(
+        [
+            "--model",
+            "gpt-5.4",
+            "--mock-profiles",
+            "--mock-llm",
+            "--levels",
+            "1",
+            "--filter",
+            "source=handwritten",
+            "--kernels",
+            "kernels",
+            "--profiles",
+            str(profiles_dir),
+            "--output",
+            str(output_dir),
+        ]
+    )
+
+    assert exit_code == 0
+    result_files = list((output_dir / "gpt-5.4" / "level_1").glob("*.json"))
+    assert len(result_files) == 5

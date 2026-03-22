@@ -13,11 +13,8 @@ from eval.prompts import PROMPTS, VALID_LABELS
 from registry import KernelRegistry, SEVERITY
 
 MODEL_CONFIG = {
-    "gpt-4o": "openai/gpt-4o",
-    "claude-sonnet-4-6": "anthropic/claude-sonnet-4-6",
-    "deepseek-v3": "deepseek/deepseek-chat",
-    "qwen2.5-coder": "openrouter/qwen/qwen-2.5-coder-32b-instruct",
-    "llama-3.1-8b": "openrouter/meta-llama/llama-3.1-8b-instruct",
+    "claude-opus-4-6": "anthropic/claude-opus-4-6",
+    "gpt-5.4": "openai/gpt-5.4",
 }
 OPPOSITE_BOTTLENECK: dict[str, str] = {
     "memory-bound": "compute-bound",
@@ -28,7 +25,9 @@ OPPOSITE_BOTTLENECK: dict[str, str] = {
 }
 COST_PER_1K_TOKENS = {
     "gpt-4o": 0.005,
+    "gpt-5.4": 0.005,
     "claude-sonnet-4-6": 0.003,
+    "claude-opus-4-6": 0.003,
     "deepseek-v3": 0.001,
     "qwen2.5-coder": 0.001,
     "llama-3.1-8b": 0.001,
@@ -45,6 +44,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--filter", action="append", default=[])
     parser.add_argument("--output", type=Path, default=Path("results"))
     parser.add_argument("--mock", action="store_true")
+    parser.add_argument("--mock-profiles", action="store_true")
+    parser.add_argument("--mock-llm", action="store_true")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--include-unverified", action="store_true")
@@ -52,7 +53,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--kernelbot", type=Path, default=Path("data/kernelbot_kernels.jsonl"))
     parser.add_argument("--kernels", type=Path, default=Path("kernels"))
     parser.add_argument("--profiles", type=Path, default=Path("profiles"))
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.mock:
+        args.mock_profiles = True
+        args.mock_llm = True
+    if args.dry_run:
+        args.mock_profiles = True
+    return args
 
 
 def parse_filter_args(raw_filters: list[str]) -> dict[str, str]:
@@ -66,7 +73,7 @@ def parse_filter_args(raw_filters: list[str]) -> dict[str, str]:
 
 
 def build_registry(args: argparse.Namespace) -> KernelRegistry:
-    registry = KernelRegistry(profile_dir=args.profiles, mock=args.mock)
+    registry = KernelRegistry(profile_dir=args.profiles, mock=args.mock_profiles)
     registry.load_mined(args.mined)
     registry.load_kernelbot(args.kernelbot)
     registry.load_handwritten(args.kernels)
@@ -158,11 +165,12 @@ def call_model(
         {"role": "system", "content": rendered_prompt["system"]},
         {"role": "user", "content": rendered_prompt["user"]},
     ]
+    resolved_model = MODEL_CONFIG.get(model_name, model_name)
     rate_limit_retries = 0
     api_retries = 0
     while True:
         try:
-            response = completion(model=MODEL_CONFIG[model_name], messages=messages)
+            response = completion(model=resolved_model, messages=messages)
             sleep_fn(0.5)
             return str(response.choices[0].message.content), False
         except Exception as exc:  # pragma: no cover - branch selection is tested by exception class name
@@ -317,7 +325,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
     total_tasks = len(tasks)
     for progress_index, (entry, level) in enumerate(tasks, start=1):
-        evaluate_entry(entry, args.model, level, args.output, args.mock, progress_index, total_tasks)
+        evaluate_entry(entry, args.model, level, args.output, args.mock_llm, progress_index, total_tasks)
     return 0
 
 
