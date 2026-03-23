@@ -165,6 +165,7 @@ def make_entry(row: dict[str, Any], fallback_index: int = 0) -> KernelEntry | No
         hardware=hardware,
         ncu_profile=make_sentinel_profile(suspected_bottleneck, confidence, matches, score_hint),
         task_id=problem_id,
+        correct_explanation=None,
     )
 
 

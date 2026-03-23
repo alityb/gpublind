@@ -51,6 +51,7 @@ class NCUProfile:
     l2_hit_rate: float                 # 0-1
     dram_bw_utilization: float         # 0-1
     raw: dict                          # full ncu output, unparsed
+    verification: Optional[dict[str, Any]] = None
 
 
 @dataclass
@@ -65,12 +66,17 @@ class KernelEntry:
     category: str                      # e.g. "compute_looks_memory"
     difficulty: Literal["easy", "medium", "hard"]
     hardware: str                      # e.g. "A10G", "A100", "H100"
+    correct_explanation: Optional[str] # plain-English statement of the true bottleneck
     ncu_profile: NCUProfile
     task_id: Optional[str]             # original source task_id if mined
+    reasoning_rubric: Optional[dict[str, Any]] = None
 
 
 def ncu_profile_from_dict(data: dict[str, Any]) -> NCUProfile:
-    return NCUProfile(
+    verification = data.get("verification")
+    if verification is None:
+        verification = dict(data.get("raw", {})).get("verification")
+    profile = NCUProfile(
         arithmetic_intensity=float(data["arithmetic_intensity"]),
         memory_bound=bool(data["memory_bound"]),
         compute_bound=bool(data["compute_bound"]),
@@ -83,7 +89,68 @@ def ncu_profile_from_dict(data: dict[str, Any]) -> NCUProfile:
         l2_hit_rate=float(data["l2_hit_rate"]),
         dram_bw_utilization=float(data["dram_bw_utilization"]),
         raw=dict(data.get("raw", {})),
+        verification=dict(verification) if isinstance(verification, dict) else None,
     )
+    if profile.verification is None:
+        profile.verification = infer_verification(profile)
+    return profile
+
+
+def infer_verification(profile: NCUProfile) -> dict[str, str]:
+    roof = profile.raw.get("roof", {})
+    ridge_point = float(profile.raw.get("ridge_point", 0.0))
+    if ridge_point <= 0.0 and isinstance(roof, dict):
+        peak_bw = float(roof.get("peak_bw_tbps", 0.0))
+        peak_flops = float(roof.get("peak_flops_tflops", 0.0))
+        if peak_bw > 0.0:
+            ridge_point = peak_flops / peak_bw
+    if profile.register_count >= 255 and profile.stall_long_sb_pct > 0.20:
+        roofline = "register-spill"
+    elif profile.achieved_occupancy < 0.10:
+        roofline = "occupancy-limited"
+    elif profile.arithmetic_intensity < ridge_point:
+        roofline = "memory-bound"
+    else:
+        roofline = "compute-bound"
+    if profile.register_count >= 255 and profile.stall_long_sb_pct > 0.20 and profile.dram_bw_utilization < 0.25:
+        bandwidth = "register-spill"
+    elif profile.achieved_occupancy < 0.10:
+        bandwidth = "occupancy-limited"
+    elif profile.dram_bw_utilization > 0.50:
+        bandwidth = "memory-bound"
+    elif profile.stall_long_sb_pct > 0.30 and profile.dram_bw_utilization < 0.10:
+        bandwidth = "latency-bound"
+    else:
+        bandwidth = "compute-bound"
+    dominant = profile.dominant_stall_type.lower()
+    if "register" in dominant:
+        stall = "register-spill"
+    elif "occupancy" in dominant:
+        stall = "occupancy-limited"
+    elif "memory" in dominant:
+        stall = "memory-bound"
+    elif "arithmetic" in dominant or dominant in {"latency-bound", "long_scoreboard"}:
+        stall = "latency-bound"
+    elif dominant == "compute":
+        stall = "compute-bound"
+    elif profile.achieved_occupancy < 0.40:
+        stall = "occupancy-limited"
+    else:
+        stall = "compute-bound"
+    votes = [roofline, bandwidth, stall]
+    counts: dict[str, int] = {}
+    for vote in votes:
+        counts[vote] = counts.get(vote, 0) + 1
+    consensus_label, consensus_count = max(counts.items(), key=lambda item: item[1])
+    consensus = consensus_label if consensus_count >= 2 else "ambiguous"
+    confidence = "high" if consensus_count == 3 else "medium" if consensus_count == 2 else "low"
+    return {
+        "roofline": roofline,
+        "bandwidth": bandwidth,
+        "stall": stall,
+        "consensus": consensus,
+        "confidence": confidence,
+    }
 
 
 def kernel_entry_from_dict(data: dict[str, Any]) -> KernelEntry:
@@ -97,6 +164,8 @@ def kernel_entry_from_dict(data: dict[str, Any]) -> KernelEntry:
         category=str(data["category"]),
         difficulty=data["difficulty"],
         hardware=str(data["hardware"]),
+        correct_explanation=data.get("correct_explanation"),
+        reasoning_rubric=dict(data["reasoning_rubric"]) if isinstance(data.get("reasoning_rubric"), dict) else None,
         ncu_profile=ncu_profile_from_dict(dict(data["ncu_profile"])),
         task_id=data.get("task_id"),
     )

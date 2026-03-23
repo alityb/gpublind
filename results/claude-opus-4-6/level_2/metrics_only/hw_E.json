@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_E",
+  "model": "claude-opus-4-6",
+  "level": 2,
+  "question_format": "metrics_only",
+  "true_bottleneck": "latency-bound",
+  "correct_explanation": "long-scoreboard stalls dominate because the kernel spends most of its time waiting on dependent operations rather than saturating bandwidth",
+  "predicted_label": "latency-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: Both DRAM bandwidth utilization (0.05%) and achieved FLOPS (2.88%) are extremely low, meaning the kernel is neither saturating memory nor compute resources. The occupancy is healthy at 87%, ruling out occupancy limitations, yet the hardware is mostly idle\u2014this pattern indicates the kernel is dominated by instruction-level latency stalls (e.g., dependency chains, small workloads, or synchronization), with the 13.6% long scoreboard stalls further confirming waiting on memory or instruction latencies rather than throughput limits.",
+  "parsed_reasoning": "Both DRAM bandwidth utilization (0.05%) and achieved FLOPS (2.88%) are extremely low, meaning the kernel is neither saturating memory nor compute resources. The occupancy is healthy at 87%, ruling out occupancy limitations, yet the hardware is mostly idle\u2014this pattern indicates the kernel is dominated by instruction-level latency stalls (e.g., dependency chains, small workloads, or synchronization), with the 13.6% long scoreboard stalls further confirming waiting on memory or instruction latencies rather than throughput limits.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 87.07%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.05%\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.05% of peak\n- Achieved FLOPS: 2.88% of peak\n- Warp stall (long scoreboard): 13.6%\n- Achieved occupancy: 87.07%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T17:08:27.417205+00:00"
+}

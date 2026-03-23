@@ -1,25 +1,58 @@
 #include <cuda_runtime.h>
 #include <cstdio>
 
+__device__ __forceinline__ float counted_mul(float a, float b) {
+    float out;
+    asm volatile("mul.rn.f32 %0, %1, %2;" : "=f"(out) : "f"(a), "f"(b));
+    return out;
+}
+
+__device__ __forceinline__ float counted_add(float a, float b) {
+    float out;
+    asm volatile("add.rn.f32 %0, %1, %2;" : "=f"(out) : "f"(a), "f"(b));
+    return out;
+}
+
 __global__ void suspicious_sync(const float* values, const int* next_slot, float* out, int n) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid >= n) {
         return;
     }
 
-    int halo_lane = threadIdx.x & 7;
-    if (halo_lane == 0) {
+    if (blockIdx.x & 1) {
         // WARNING: sync inside branch
+        __syncthreads();
+    } else {
         __syncthreads();
     }
 
-    int cursor = next_slot[tid];
-    float acc = 0.0f;
-    #pragma unroll
-    for (int step = 0; step < 4; ++step) {
-        cursor = next_slot[(cursor + step * 17) & (n - 1)];
-        acc += values[cursor] * (0.5f + 0.125f * step);
+    int mask = n - 1;
+    int lane = threadIdx.x & 31;
+    int cursor = (tid * 37 + lane * 97) & mask;
+    float acc = values[(cursor + lane * 13) & mask];
+    float scale0 = 0.25f + 0.03125f * static_cast<float>(lane & 7);
+    float scale1 = 0.75f - 0.015625f * static_cast<float>(lane & 15);
+
+    #pragma unroll 1
+    for (int step = 0; step < 16; ++step) {
+        cursor = next_slot[(cursor + step * 119 + lane * 17) & mask];
+        float sample0 = values[cursor];
+        float sample1 = values[(cursor + 257) & mask];
+
+        #pragma unroll
+        for (int mix = 0; mix < 8; ++mix) {
+            float coeff0 = scale0 + 0.0078125f * static_cast<float>(mix + 1);
+            float coeff1 = scale1 - 0.00390625f * static_cast<float>((mix + step) & 7);
+            float t0 = counted_mul(sample0, coeff0);
+            float t1 = counted_mul(sample1, coeff1);
+            acc = counted_add(acc, t0);
+            acc = counted_add(acc, t1);
+        }
+
+        scale0 = counted_add(counted_mul(scale0, 1.0009765625f), 0.00390625f);
+        scale1 = counted_add(counted_mul(scale1, 0.9990234375f), 0.001953125f);
     }
+
     out[tid] = acc;
 }
 

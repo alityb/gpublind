@@ -22,31 +22,38 @@ BW_SOURCE = r'''
 #include <cuda_runtime.h>
 #include <cstdio>
 
-__global__ void stream_copy(const float* src, float* dst, int n, int iters) {
+__global__ void stream_copy(const float* __restrict__ src,
+                             float* __restrict__ dst, int n) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid >= n) return;
-    float v = src[tid];
-    #pragma unroll 4
-    for (int i = 0; i < iters; ++i) {
-        dst[tid] = v + static_cast<float>(i & 1);
-        v = dst[tid];
+    int stride = blockDim.x * gridDim.x;
+    for (int i = tid; i < n; i += stride) {
+        dst[i] = src[i];
     }
 }
 
 int main() {
-    const int n = 1 << 24;
-    const int iters = 128;
+    // 512MB buffer — well above A10G L2 (6MB) to force DRAM traffic
+    const int n = 1 << 27;
+    const int warmup = 5;
+    const int iters = 20;
     const size_t bytes = static_cast<size_t>(n) * sizeof(float);
     float *src, *dst;
     cudaMalloc(&src, bytes);
     cudaMalloc(&dst, bytes);
-    cudaMemset(src, 0, bytes);
+    cudaMemset(src, 1, bytes);
     cudaMemset(dst, 0, bytes);
+    int threads = 256;
+    int blocks = (n + threads - 1) / threads;
+    // warmup
+    for (int i = 0; i < warmup; ++i)
+        stream_copy<<<blocks, threads>>>(src, dst, n);
+    cudaDeviceSynchronize();
     cudaEvent_t start, stop;
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     cudaEventRecord(start);
-    stream_copy<<<(n + 255) / 256, 256>>>(src, dst, n, iters);
+    for (int i = 0; i < iters; ++i)
+        stream_copy<<<blocks, threads>>>(src, dst, n);
     cudaEventRecord(stop);
     cudaEventSynchronize(stop);
     float ms = 0.0f;

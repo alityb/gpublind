@@ -2,11 +2,12 @@
   "id": "hw_D",
   "category": "occupancy_trap",
   "true_bottleneck": "occupancy-limited",
-  "misleading_signal": "the 32x32 shared-memory staging looks like deliberate textbook tiling, but the staged buffers quietly consume enough SM resources to crush occupancy",
+  "correct_explanation": "large shared-memory tiles collapse occupancy and leave too few warps to hide latency",
+  "misleading_signal": "the kernel appears memory-bound because the measured arithmetic intensity is low, but the real constraint is occupancy collapse from the large shared-memory allocation",
   "difficulty": "hard",
-  "hardware": "A100",
+  "hardware": "A10G",
   "reasoning_rubric": {
-    "must_mention": ["shared memory allocation per block", "achieved occupancy"],
-    "must_not_cite_as_primary": ["32x32 tiling", "L1 reuse optimization"]
+    "must_mention": ["sm__warps_active.avg.pct_of_peak_sustained_active", "launch__shared_mem_per_block"],
+    "must_not_cite_as_primary": ["low arithmetic intensity alone", "memory-bound classification"]
   }
 }

@@ -1,0 +1,13 @@
+{
+  "id": "hw_F",
+  "category": "compute_bound_reference",
+  "true_bottleneck": "compute-bound",
+  "correct_explanation": "shared-memory tiling and repeated tile reuse drive arithmetic intensity far above the roofline ridge point",
+  "misleading_signal": "the tiled loads may draw attention to memory movement, but the kernel does far more floating-point work than global-memory traffic",
+  "difficulty": "easy",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_mention": ["arithmetic intensity", "ridge point", "dram bandwidth utilization"],
+    "must_not_cite_as_primary": ["shared memory usage", "load instructions"]
+  }
+}

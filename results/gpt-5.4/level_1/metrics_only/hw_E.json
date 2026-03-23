@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_E",
+  "model": "gpt-5.4",
+  "level": 1,
+  "question_format": "metrics_only",
+  "true_bottleneck": "latency-bound",
+  "correct_explanation": "long-scoreboard stalls dominate because the kernel spends most of its time waiting on dependent operations rather than saturating bandwidth",
+  "predicted_label": "latency-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\n\nREASONING: The kernel is using almost none of the available memory bandwidth (0.05% of peak) and only a tiny fraction of compute throughput (2.88% of peak), so it is not saturating either the memory system or the arithmetic units. With high achieved occupancy (87.07%), the GPU has plenty of resident warps, yet performance remains low, which points to stalls from waiting on operations rather than lack of parallelism; the nontrivial long-scoreboard stall rate is consistent with latency-limited execution.",
+  "parsed_reasoning": "The kernel is using almost none of the available memory bandwidth (0.05% of peak) and only a tiny fraction of compute throughput (2.88% of peak), so it is not saturating either the memory system or the arithmetic units. With high achieved occupancy (87.07%), the GPU has plenty of resident warps, yet performance remains low, which points to stalls from waiting on operations rather than lack of parallelism; the nontrivial long-scoreboard stall rate is consistent with latency-limited execution.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.05% of peak\n- Achieved FLOPS: 2.88% of peak\n- Warp stall (long scoreboard): 13.6%\n- Achieved occupancy: 87.07%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:58:03.209975+00:00"
+}

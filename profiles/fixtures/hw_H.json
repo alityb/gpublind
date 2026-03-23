@@ -1,0 +1,30 @@
+{
+  "arithmetic_intensity": 36.0,
+  "memory_bound": false,
+  "compute_bound": false,
+  "dominant_stall_type": "register_spill",
+  "global_load_efficiency": 0.37,
+  "achieved_occupancy": 0.52,
+  "stall_long_sb_pct": 0.41,
+  "stall_mem_pct": 0.09,
+  "register_count": 255,
+  "l2_hit_rate": 0.43,
+  "dram_bw_utilization": 0.11,
+  "verification": {
+    "roofline": "register-spill",
+    "bandwidth": "register-spill",
+    "stall": "register-spill",
+    "consensus": "register-spill",
+    "confidence": "high"
+  },
+  "raw": {
+    "ridge_point": 36.75675675675676,
+    "latency_ms": 2.9,
+    "roof": {
+      "gpu_name": "Mock A100",
+      "peak_bw_tbps": 1.85,
+      "peak_flops_tflops": 68.0,
+      "measured": true
+    }
+  }
+}

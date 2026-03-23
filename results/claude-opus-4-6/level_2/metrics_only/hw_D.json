@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_D",
+  "model": "claude-opus-4-6",
+  "level": 2,
+  "question_format": "metrics_only",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": "large shared-memory tiles collapse occupancy and leave too few warps to hide latency",
+  "predicted_label": "occupancy-limited",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: occupancy-limited\nREASONING: The achieved occupancy is only 35.03%, which is significantly below optimal levels, while both DRAM bandwidth utilization and achieved FLOPS are at 0.0%, indicating the kernel is too small or too short to saturate either compute or memory resources. The low occupancy suggests insufficient parallelism, likely due to excessive register usage per thread, large shared memory allocation per block, or small grid dimensions, which limits the GPU's ability to hide latency through warp scheduling. The near-zero latency and minimal warp stalls on long scoreboard further confirm the kernel is not bottlenecked on memory or compute but rather on the inability to launch enough concurrent warps.",
+  "parsed_reasoning": "The achieved occupancy is only 35.03%, which is significantly below optimal levels, while both DRAM bandwidth utilization and achieved FLOPS are at 0.0%, indicating the kernel is too small or too short to saturate either compute or memory resources. The low occupancy suggests insufficient parallelism, likely due to excessive register usage per thread, large shared memory allocation per block, or small grid dimensions, which limits the GPU's ability to hide latency through warp scheduling. The near-zero latency and minimal warp stalls on long scoreboard further confirm the kernel is not bottlenecked on memory or compute but rather on the inability to launch enough concurrent warps.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 35.03%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.0%\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.0% of peak\n- Achieved FLOPS: 0.0% of peak\n- Warp stall (long scoreboard): 5.61%\n- Achieved occupancy: 35.03%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:37:32.533041+00:00"
+}

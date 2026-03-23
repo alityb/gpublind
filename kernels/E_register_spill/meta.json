@@ -1,12 +1,13 @@
 {
   "id": "hw_E",
-  "category": "register_spill",
-  "true_bottleneck": "register-spill",
-  "misleading_signal": "the kernel reads contiguous windows from two arrays and looks like a straightforward streaming filter, but the real issue is excessive per-thread state",
+  "category": "latency_looks_memory",
+  "true_bottleneck": "latency-bound",
+  "correct_explanation": "long-scoreboard stalls dominate because the kernel spends most of its time waiting on dependent operations rather than saturating bandwidth",
+  "misleading_signal": "the kernel presents a low-AI memory-bound signature, but the more reliable clue is the elevated long-scoreboard stall showing latency pressure rather than a clean throughput bottleneck",
   "difficulty": "hard",
-  "hardware": "A100",
+  "hardware": "A10G",
   "reasoning_rubric": {
-    "must_mention": ["register count per thread", "local-memory spill traffic"],
-    "must_not_cite_as_primary": ["contiguous global loads", "streaming memory pattern"]
+    "must_mention": ["smsp__warp_issue_stalled_long_scoreboard_per_warp_active.pct", "arithmetic_intensity"],
+    "must_not_cite_as_primary": ["memory_bound=true alone", "streaming FIR access pattern"]
   }
 }

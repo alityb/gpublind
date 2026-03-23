@@ -10,6 +10,13 @@
   "register_count": 88,
   "l2_hit_rate": 0.79,
   "dram_bw_utilization": 0.36,
+  "verification": {
+    "roofline": "memory-bound",
+    "bandwidth": "occupancy-limited",
+    "stall": "latency-bound",
+    "consensus": "ambiguous",
+    "confidence": "low"
+  },
   "raw": {
     "ridge_point": 36.75675675675676,
     "latency_ms": 2.8,

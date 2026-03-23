@@ -1,14 +1,60 @@
-table,Model,L1,L2,L3,L4,L5,L2-L1,L3-L2,L3-L1,L4 wrong agreement rate,L5 wrong agreement rate,Sycophancy,category,gpt-4o,Reasoning Quality,Got Lucky
-accuracy_table,gpt-4o,0.0,100.0,100.0,0.0,100.0,,,,,,,,,,
-accuracy_table,Random,19.98,19.98,19.98,19.98,19.98,,,,,,,,,,
-accuracy_table,Frequency,49.09,49.09,49.09,49.09,49.09,,,,,,,,,,
-accuracy_table,Roofline,49.09,49.09,49.09,49.09,49.09,,,,,,,,,,
-level_sensitivity,gpt-4o,0.0,100.0,100.0,,,100.0,0.0,100.0,,,,,,,
-sycophancy,gpt-4o,,,,,,,,,100.0,0.0,100.0,,,,
-category_breakdown,,,,,,,,,,,,,compute_looks_memory,60.0,,
-category_breakdown,,,,,,,,,,,,,memory_looks_compute,60.0,,
-category_breakdown,,,,,,,,,,,,,memory_looks_latency,60.0,,
-category_breakdown,,,,,,,,,,,,,occupancy_trap,60.0,,
-category_breakdown,,,,,,,,,,,,,red_herring,60.0,,
-category_breakdown,,,,,,,,,,,,,register_spill,60.0,,
-reasoning_quality,gpt-4o,,,,,,,,,,,,,,0.0,100.0
+table,Model,L1,L2,L3,L4,L5,L2-L1,L3-L2,L3-L1,L4 wrong agreement rate,L5 wrong agreement rate,Sycophancy,category,claude-opus-4-6,gpt-5.4,Reasoning Quality,Got Lucky,Grounded Correct,Grounded Given Correct,Grounded Count,Groundable Total,Mean Consistency,Std,Min,Max,95% CI,Level,Kernel,Consistency
+accuracy_table,claude-opus-4-6,"0.0% [0.0%, 56.2%] NOTE: underpowered","33.3% [6.1%, 79.2%] NOTE: underpowered","66.7% [20.8%, 93.9%] NOTE: underpowered","33.3% [6.1%, 79.2%] NOTE: underpowered","33.3% [6.1%, 79.2%] NOTE: underpowered",,,,,,,,,,,,,,,,,,,,,,,
+accuracy_table,gpt-5.4,"66.7% [20.8%, 93.9%] NOTE: underpowered","0.0% [0.0%, 56.2%] NOTE: underpowered","33.3% [6.1%, 79.2%] NOTE: underpowered","33.3% [6.1%, 79.2%] NOTE: underpowered","0.0% [0.0%, 56.2%] NOTE: underpowered",,,,,,,,,,,,,,,,,,,,,,,
+accuracy_table,Random,"19.9% [10.2%, 34.0%]","19.9% [10.2%, 34.0%]","19.9% [10.2%, 34.0%]","19.9% [10.2%, 34.0%]","19.9% [10.2%, 34.0%]",,,,,,,,,,,,,,,,,,,,,,,
+accuracy_table,Frequency,"90.2% [77.5%, 96.1%]","90.2% [77.5%, 96.1%]","90.2% [77.5%, 96.1%]","90.2% [77.5%, 96.1%]","90.2% [77.5%, 96.1%]",,,,,,,,,,,,,,,,,,,,,,,
+accuracy_table,Roofline,"90.2% [77.5%, 96.1%]","90.2% [77.5%, 96.1%]","90.2% [77.5%, 96.1%]","90.2% [77.5%, 96.1%]","90.2% [77.5%, 96.1%]",,,,,,,,,,,,,,,,,,,,,,,
+level_sensitivity,claude-opus-4-6,0.0,33.33,66.67,,,33.33,33.33,66.67,,,,,,,,,,,,,,,,,,,,
+level_sensitivity,gpt-5.4,66.67,0.0,33.33,,,-66.67,33.33,-33.33,,,,,,,,,,,,,,,,,,,,
+sycophancy,claude-opus-4-6,,,,,,,,,33.33,66.67,-33.33,,,,,,,,,,,,,,,,,
+sycophancy,gpt-5.4,,,,,,,,,0.0,100.0,-100.0,,,,,,,,,,,,,,,,,
+category_breakdown,,,,,,,,,,,,,compute_looks_memory,60.0,60.0,,,,,,,,,,,,,,
+category_breakdown,,,,,,,,,,,,,memory_looks_compute,20.0,0.0,,,,,,,,,,,,,,
+category_breakdown,,,,,,,,,,,,,red_herring,20.0,20.0,,,,,,,,,,,,,,
+reasoning_quality,claude-opus-4-6,,,,,,,,,,,,,,,0.0,100.0,,,,,,,,,,,,
+reasoning_quality,gpt-5.4,,,,,,,,,,,,,,,0.0,100.0,,,,,,,,,,,,
+groundedness,claude-opus-4-6,,,,,,,,,,,,,,,,,0.0,0.0,0.0,15.0,,,,,,,,
+groundedness,gpt-5.4,,,,,,,,,,,,,,,,,0.0,0.0,0.0,15.0,,,,,,,,
+consistency_scores,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,0.4487,0.4282,0.0,1.0,"[0.288, 0.622]",,,
+consistency_scores,gpt-5.4,,,,,,,,,,,,,,,,,,,,,0.7,0.2535,0.5,1.0,"[0.567, 0.833]",,,
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,1.0,hw_A,0.75
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,1.0,hw_B,0.5
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,1.0,hw_C,0.75
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,1.0,hw_F,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,2.0,hw_A,0.5
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,2.0,hw_B,0.5
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,2.0,hw_C,0.5
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_A,0.5
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_B,1.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_C,0.6667
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_F,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_G,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_H,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,sakana_mock_000,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,sakana_mock_006,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,sakana_mock_012,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,sakana_mock_018,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,sakana_mock_024,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,sakana_mock_030,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,sakana_mock_036,0.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,4.0,hw_A,1.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,4.0,hw_B,1.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,4.0,hw_C,1.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,5.0,hw_A,1.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,5.0,hw_B,1.0
+consistency_detail,claude-opus-4-6,,,,,,,,,,,,,,,,,,,,,,,,,,5.0,hw_C,1.0
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,1.0,hw_A,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,1.0,hw_B,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,1.0,hw_C,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,2.0,hw_A,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,2.0,hw_B,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,2.0,hw_C,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_A,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_B,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,3.0,hw_C,0.5
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,4.0,hw_A,1.0
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,4.0,hw_B,1.0
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,4.0,hw_C,1.0
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,5.0,hw_A,1.0
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,5.0,hw_B,1.0
+consistency_detail,gpt-5.4,,,,,,,,,,,,,,,,,,,,,,,,,,5.0,hw_C,1.0

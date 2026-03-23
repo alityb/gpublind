@@ -1,0 +1,13 @@
+{
+  "id": "hw_H",
+  "category": "register_spill_reference",
+  "true_bottleneck": "register-spill",
+  "correct_explanation": "the FIR-style state and tap arrays create extreme register pressure, forcing spills to local memory",
+  "misleading_signal": "the code looks like a straightforward streaming filter, but the real cost comes from local-memory spill traffic rather than the sequential loads",
+  "difficulty": "easy",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_mention": ["launch__registers_per_thread", "local memory spill traffic", "verification confidence"],
+    "must_not_cite_as_primary": ["sequential input stream", "simple FIR structure"]
+  }
+}

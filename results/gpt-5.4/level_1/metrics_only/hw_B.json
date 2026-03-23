@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_B",
+  "model": "gpt-5.4",
+  "level": 1,
+  "question_format": "metrics_only",
+  "true_bottleneck": "latency-bound",
+  "correct_explanation": "arithmetic dependency chains create long scoreboard stalls that prevent warp hiding",
+  "predicted_label": "latency-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\n\nREASONING: The dominant 57.06% long-scoreboard stall indicates warps are spending most of their time waiting on data dependencies, typically memory access latency, rather than saturating bandwidth or compute units. Since achieved bandwidth is 0.0% of peak, FLOPS are only 1.0% of peak, and occupancy is still fairly healthy at 74.17%, the kernel is primarily limited by latency rather than throughput or occupancy.",
+  "parsed_reasoning": "The dominant 57.06% long-scoreboard stall indicates warps are spending most of their time waiting on data dependencies, typically memory access latency, rather than saturating bandwidth or compute units. Since achieved bandwidth is 0.0% of peak, FLOPS are only 1.0% of peak, and occupancy is still fairly healthy at 74.17%, the kernel is primarily limited by latency rather than throughput or occupancy.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.0% of peak\n- Achieved FLOPS: 1.0% of peak\n- Warp stall (long scoreboard): 57.06%\n- Achieved occupancy: 74.17%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:55:03.494299+00:00"
+}

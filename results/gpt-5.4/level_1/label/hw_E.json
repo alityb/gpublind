@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_E",
+  "model": "gpt-5.4",
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "latency-bound",
+  "correct_explanation": "long-scoreboard stalls dominate because the kernel spends most of its time waiting on dependent operations rather than saturating bandwidth",
+  "predicted_label": "register-spill",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: register-spill\nREASONING: This kernel allocates very large per-thread local arrays (`taps[32]`, `state[96]`, `partial[32]`), and with aggressive unrolling they create extremely high register pressure. On real GPUs these arrays typically cannot stay fully in registers, so they spill to local memory, turning many intended register accesses into off-chip/local-memory traffic and dominating runtime more than the arithmetic itself.",
+  "parsed_reasoning": "This kernel allocates very large per-thread local arrays (`taps[32]`, `state[96]`, `partial[32]`), and with aggressive unrolling they create extremely high register pressure. On real GPUs these arrays typically cannot stay fully in registers, so they spill to local memory, turning many intended register accesses into off-chip/local-memory traffic and dominating runtime more than the arithmetic itself.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ __launch_bounds__(256, 1) void streamed_filter(const float* x, const float* y, float* out, int n) {\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    if (tid >= n) {\n        return;\n    }\n\n    int mask = n - 1;\n    float taps[32];\n    float state[96];\n    float partial[32];\n\n    #pragma unroll\n    for (int i = 0; i < 32; ++i) {\n        int coeff_idx = (blockIdx.x * 17 + i) & mask;\n        taps[i] = y[coeff_idx] * (0.125f + 0.00390625f * static_cast<float>(i));\n        partial[i] = 0.0f;\n    }\n\n    #pragma unroll\n    for (int i = 0; i < 96; ++i) {\n        int sample_idx = (tid + i) & mask;\n        float xv = x[sample_idx];\n        float yv = y[(sample_idx + 9) & mask];\n        float mix0 = __fmul_rn(xv, 0.5f + 0.00390625f * static_cast<float>(i & 15));\n        float mix1 = __fmul_rn(yv, 0.25f - 0.001953125f * static_cast<float>(i & 7));\n        state[i] = __fadd_rn(mix0, mix1);\n    }\n\n    #pragma unroll\n    for (int phase = 0; phase < 3; ++phase) {\n        #pragma unroll\n        for (int tap = 0; tap < 32; ++tap) {\n            float s0 = state[phase * 16 + tap];\n            float s1 = state[phase * 16 + tap + 16];\n            float coeff0 = taps[tap];\n            float coeff1 = taps[(tap + phase * 5 + 7) & 31];\n            float prod0 = __fmul_rn(s0, coeff0);\n            float prod1 = __fmul_rn(s1, coeff1);\n            partial[tap] = __fadd_rn(partial[tap], prod0);\n            partial[tap] = __fadd_rn(partial[tap], prod1);\n        }\n    }\n\n    float acc = 0.0f;\n    #pragma unroll\n    for (int tap = 0; tap < 32; ++tap) {\n        float blend0 = __fmul_rn(partial[tap], 1.0f / static_cast<float>(tap + 1));\n        float blend1 = __fmul_rn(state[tap + 48], 0.03125f);\n        acc = __fadd_rn(acc, blend0);\n        acc = __fadd_rn(acc, blend1);\n    }\n\n    out[tid] = acc;\n}\n\nint main() {\n    const int n = 1 << 20;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float* h = new float[n];\n    float *x, *y, *out;\n    cudaMalloc(&x, bytes);\n    cudaMalloc(&y, bytes);\n    cudaMalloc(&out, bytes);\n    for (int i = 0; i < n; ++i) {\n        h[i] = static_cast<float>((i * 5) % 257) * 0.01f;\n    }\n    cudaMemcpy(x, h, bytes, cudaMemcpyHostToDevice);\n    cudaMemcpy(y, h, bytes, cudaMemcpyHostToDevice);\n    streamed_filter<<<(n + 255) / 256, 256>>>(x, y, out, n);\n    cudaMemcpy(h, out, bytes, cudaMemcpyDeviceToHost);\n    std::printf(\"%f\\n\", h[4]);\n    cudaFree(x);\n    cudaFree(y);\n    cudaFree(out);\n    delete[] h;\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:57:45.668299+00:00"
+}

@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_B",
+  "model": "gpt-5.4",
+  "level": 2,
+  "question_format": "metrics_only",
+  "true_bottleneck": "latency-bound",
+  "correct_explanation": "arithmetic dependency chains create long scoreboard stalls that prevent warp hiding",
+  "predicted_label": "latency-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\n\nREASONING: The kernel is using virtually none of peak DRAM bandwidth or peak FLOPS, so it is neither memory-bandwidth-bound nor compute-bound. The dominant 57.06% long-scoreboard stalls indicate warps are waiting on data dependencies/memory latency, and with 74.17% occupancy there are not enough ready warps to fully hide that latency.",
+  "parsed_reasoning": "The kernel is using virtually none of peak DRAM bandwidth or peak FLOPS, so it is neither memory-bandwidth-bound nor compute-bound. The dominant 57.06% long-scoreboard stalls indicate warps are waiting on data dependencies/memory latency, and with 74.17% occupancy there are not enough ready warps to fully hide that latency.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 74.17%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.0%\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.0% of peak\n- Achieved FLOPS: 1.0% of peak\n- Warp stall (long scoreboard): 57.06%\n- Achieved occupancy: 74.17%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:55:19.464675+00:00"
+}

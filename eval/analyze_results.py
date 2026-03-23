@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import random
+from collections import Counter
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -15,8 +18,14 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze GPUBlind results")
     parser.add_argument("--results", type=Path, default=Path("results"))
     parser.add_argument("--mined", type=Path, default=Path("data/mined_kernels.jsonl"))
+    parser.add_argument("--kernelbot", type=Path, default=Path("data/kernelbot_kernels.jsonl"))
+    parser.add_argument("--kernelbench-compute", type=Path, default=Path("data/kernelbench_compute_candidates.jsonl"))
+    parser.add_argument("--latency", type=Path, default=Path("data/latency_bound_candidates.jsonl"))
+    parser.add_argument("--register-spill", type=Path, default=Path("data/register_spill_candidates.jsonl"))
     parser.add_argument("--kernels", type=Path, default=Path("kernels"))
     parser.add_argument("--profiles", type=Path, default=Path("profiles"))
+    parser.add_argument("--include-formats", action="store_true")
+    parser.add_argument("--min-confidence", choices=["high", "medium", "any"], default="medium")
     return parser.parse_args(argv)
 
 
@@ -31,30 +40,164 @@ def frame_to_markdown(df: pd.DataFrame) -> str:
     return "\n".join("| " + " | ".join(row) + " |" for row in rows)
 
 
+def infer_result_metadata(path: Path, results_dir: Path) -> dict[str, Any]:
+    relative_parts = path.relative_to(results_dir).parts
+    metadata: dict[str, Any] = {"model": relative_parts[0], "trial": 1, "question_format": "label"}
+    for index, part in enumerate(relative_parts):
+        if part.startswith("trial_"):
+            try:
+                metadata["trial"] = int(part.split("_", 1)[1])
+            except ValueError:
+                metadata["trial"] = 1
+        elif part.startswith("level_"):
+            metadata["level"] = int(part.split("_", 1)[1])
+            if index + 1 < len(relative_parts) - 1:
+                metadata["question_format"] = relative_parts[index + 1]
+    return metadata
+
+
 def load_results(results_dir: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for path in sorted(results_dir.glob("*/level_*/*.json")):
-        payload = json.loads(path.read_text(encoding="utf-8"))
+    for path in sorted(results_dir.rglob("*.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            continue
+        metadata = infer_result_metadata(path, results_dir)
         if isinstance(payload, list):
-            rows.extend(payload)
+            for row in payload:
+                for key, value in metadata.items():
+                    row.setdefault(key, value)
+                rows.append(row)
         else:
+            for key, value in metadata.items():
+                payload.setdefault(key, value)
             rows.append(payload)
     return rows
 
 
-def load_registry(mined: Path, kernels: Path, profiles: Path) -> KernelRegistry:
+def load_registry(
+    mined: Path,
+    kernelbot: Path,
+    kernelbench_compute: Path,
+    latency: Path,
+    register_spill: Path,
+    kernels: Path,
+    profiles: Path,
+    min_confidence: str,
+) -> KernelRegistry:
     registry = KernelRegistry(profile_dir=profiles, mock=True)
     registry.load_mined(mined)
+    registry.load_mined(kernelbench_compute)
+    registry.load_mined(latency)
+    registry.load_mined(register_spill)
+    registry.load_kernelbot(kernelbot)
     registry.load_handwritten(kernels)
     return registry
 
 
 def latest_per_combo(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    latest: dict[tuple[str, int, str], dict[str, Any]] = {}
+    latest: dict[tuple[str, int, int, str, str], dict[str, Any]] = {}
     for row in rows:
-        key = (str(row["model"]), int(row["level"]), str(row["kernel_id"]))
+        key = (
+            str(row["model"]),
+            int(row.get("trial", 1)),
+            int(row["level"]),
+            str(row["kernel_id"]),
+            str(row.get("question_format", "label")),
+        )
         latest[key] = row
     return list(latest.values())
+
+
+def wilson_interval(successes: int, total: int, z: float = 1.96) -> tuple[float, float]:
+    if total <= 0:
+        return 0.0, 0.0
+    p = successes / total
+    denom = 1.0 + (z * z) / total
+    center = (p + (z * z) / (2.0 * total)) / denom
+    margin = (z / denom) * math.sqrt((p * (1.0 - p) / total) + ((z * z) / (4.0 * total * total)))
+    return max(0.0, center - margin), min(1.0, center + margin)
+
+
+def format_ci_value(value: float, lower: float, upper: float) -> str:
+    warning = " NOTE: underpowered" if (upper - lower) * 100.0 > 30.0 else ""
+    return f"{value * 100.0:.1f}% [{lower * 100.0:.1f}%, {upper * 100.0:.1f}%]{warning}"
+
+
+def bootstrap_mean_ci(values: list[float], samples: int = 1000, seed: int = 7) -> tuple[float, float]:
+    if not values:
+        return 0.0, 0.0
+    rng = random.Random(seed)
+    means: list[float] = []
+    for _ in range(samples):
+        sample = [values[rng.randrange(len(values))] for _ in range(len(values))]
+        means.append(sum(sample) / len(sample))
+    means.sort()
+    lower = means[int(0.025 * (samples - 1))]
+    upper = means[int(0.975 * (samples - 1))]
+    return lower, upper
+
+
+def consistency_score(results_for_one_kernel_one_model: list[dict[str, Any]]) -> float:
+    labels: list[str] = []
+    for row in results_for_one_kernel_one_model:
+        fmt = row.get("question_format", "label")
+        if fmt == "fix" or fmt == "junior_right":
+            continue
+        if fmt == "rank":
+            ranking = row.get("parsed_ranking") or []
+            if ranking:
+                labels.append(str(ranking[0]))
+        elif fmt == "junior_wrong":
+            assessment = row.get("parsed_assessment")
+            if assessment == "AGREE":
+                labels.append("memory-bound")
+            elif assessment == "DISAGREE":
+                labels.append("not-memory-bound")
+        elif fmt == "yesno_memory":
+            labels.append(str(row.get("predicted_label")))
+        elif fmt == "label":
+            labels.append(str(row.get("predicted_label")))
+    if not labels:
+        return 0.0
+    majority = Counter(labels).most_common(1)[0][0]
+    return sum(label == majority for label in labels) / len(labels)
+
+
+def compute_consistency_scores(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    if df.empty:
+        return pd.DataFrame(), pd.DataFrame()
+    rows: list[dict[str, Any]] = []
+    grouped = df.groupby(["model", "level", "kernel_id"], dropna=False)
+    for (model, level, kernel_id), subset in grouped:
+        score = consistency_score(subset.to_dict("records"))
+        rows.append(
+            {
+                "Model": model,
+                "Level": int(level),
+                "Kernel": kernel_id,
+                "Consistency": round(score, 4),
+            }
+        )
+    detail = pd.DataFrame(rows)
+    if detail.empty:
+        return detail, pd.DataFrame()
+    summary = (
+        detail.groupby("Model")["Consistency"]
+        .agg(["mean", "std", "min", "max"])
+        .reset_index()
+        .rename(columns={"mean": "Mean Consistency", "std": "Std", "min": "Min", "max": "Max"})
+    )
+    ci_strings: list[str] = []
+    for model in summary["Model"]:
+        values = detail[detail["Model"] == model]["Consistency"].tolist()
+        lower, upper = bootstrap_mean_ci(values)
+        ci_strings.append(f"[{lower:.3f}, {upper:.3f}]")
+    summary["95% CI"] = ci_strings
+    for column in ["Mean Consistency", "Std", "Min", "Max"]:
+        summary[column] = summary[column].fillna(0.0).round(4)
+    return detail, summary
 
 
 def accuracy_table(df: pd.DataFrame, registry: KernelRegistry) -> pd.DataFrame:
@@ -64,22 +207,37 @@ def accuracy_table(df: pd.DataFrame, registry: KernelRegistry) -> pd.DataFrame:
         row: dict[str, Any] = {"Model": model}
         for level in range(1, 6):
             subset = df[(df["model"] == model) & (df["level"] == level)]
-            row[f"L{level}"] = round(100.0 * subset["correct"].mean(), 2) if not subset.empty else None
+            if subset.empty:
+                row[f"L{level}"] = None
+            else:
+                successes = int(subset["correct"].astype(bool).sum())
+                total = len(subset)
+                lower, upper = wilson_interval(successes, total)
+                row[f"L{level}"] = format_ci_value(successes / total, lower, upper)
         rows.append(row)
     random_row = {"Model": "Random"}
     random_stats = random_baseline(list(registry))
     for level in range(1, 6):
-        random_row[f"L{level}"] = round(100.0 * random_stats["mean"], 2)
+        total = max(len(list(registry)), 1)
+        mean_accuracy = float(random_stats["mean"])
+        lower, upper = wilson_interval(int(round(mean_accuracy * total)), total)
+        random_row[f"L{level}"] = format_ci_value(mean_accuracy, lower, upper)
     rows.append(random_row)
     frequency = frequency_baseline(list(registry))
     frequency_row = {"Model": "Frequency"}
     for level in range(1, 6):
-        frequency_row[f"L{level}"] = round(100.0 * float(frequency["accuracy"]), 2)
+        total = max(len(list(registry)), 1)
+        accuracy = float(frequency["accuracy"])
+        lower, upper = wilson_interval(int(round(accuracy * total)), total)
+        frequency_row[f"L{level}"] = format_ci_value(accuracy, lower, upper)
     rows.append(frequency_row)
     roofline = roofline_baseline(list(registry))
     roofline_row = {"Model": "Roofline"}
     for level in range(1, 6):
-        roofline_row[f"L{level}"] = round(100.0 * float(roofline["accuracy"]), 2)
+        total = max(len(list(registry)), 1)
+        accuracy = float(roofline["accuracy"])
+        lower, upper = wilson_interval(int(round(accuracy * total)), total)
+        roofline_row[f"L{level}"] = format_ci_value(accuracy, lower, upper)
     rows.append(roofline_row)
     return pd.DataFrame(rows)
 
@@ -187,7 +345,55 @@ def write_reasoning_quality(df: pd.DataFrame, output_path: Path) -> pd.DataFrame
     return table
 
 
-def write_summary(df: pd.DataFrame, output_path: Path) -> None:
+def automatic_grounded_reasoning(row: dict[str, Any], registry: KernelRegistry) -> bool | None:
+    kernel_id = str(row.get("kernel_id", ""))
+    if not kernel_id:
+        return False
+    try:
+        entry = registry.get(kernel_id)
+    except KeyError:
+        return None
+    rubric = entry.reasoning_rubric or {}
+    must_mention = [str(item).lower() for item in rubric.get("must_mention", [])]
+    must_not = [str(item).lower() for item in rubric.get("must_not_cite_as_primary", [])]
+    if not must_mention:
+        return None
+    reasoning = str(row.get("parsed_reasoning") or row.get("raw_response") or "").strip().lower()
+    if not reasoning:
+        return False
+    first_sentence = reasoning.split(".", 1)[0]
+    mentions_required = any(token in reasoning for token in must_mention)
+    avoids_red_herring = not any(token in first_sentence for token in must_not)
+    return bool(row.get("correct") is True and mentions_required and avoids_red_herring)
+
+
+def write_groundedness(df: pd.DataFrame, registry: KernelRegistry, output_path: Path) -> pd.DataFrame:
+    rows: list[dict[str, Any]] = []
+    for model in sorted(df["model"].unique()) if not df.empty else []:
+        subset = df[df["model"] == model]
+        records = subset.to_dict("records")
+        grounded_correct = [automatic_grounded_reasoning(record, registry) for record in records]
+        scored = [value for value in grounded_correct if value is not None]
+        correct_total = int(subset["correct"].astype(bool).sum()) if not subset.empty else 0
+        grounded_total = sum(value is True for value in scored)
+        total = len(scored)
+        grounded_rate = (grounded_total / total) if total else 0.0
+        grounded_given_correct = (grounded_total / correct_total) if correct_total else 0.0
+        rows.append(
+            {
+                "Model": model,
+                "Grounded Correct": round(100.0 * grounded_rate, 2),
+                "Grounded Given Correct": round(100.0 * grounded_given_correct, 2),
+                "Grounded Count": grounded_total,
+                "Groundable Total": total,
+            }
+        )
+    table = pd.DataFrame(rows)
+    output_path.write_text(frame_to_markdown(table) + "\n", encoding="utf-8")
+    return table
+
+
+def write_summary(df: pd.DataFrame, output_path: Path, consistency_table: pd.DataFrame | None = None) -> None:
     if df.empty:
         output_path.write_text("No results available.\n", encoding="utf-8")
         return
@@ -214,6 +420,15 @@ def write_summary(df: pd.DataFrame, output_path: Path) -> None:
         f"2. {most_improved} improved the most from level 1 to level 3, gaining {most_improved_delta:.2f} points when profiler evidence was added.\n"
         f"3. {most_sycophantic} was most vulnerable to adversarial framing at level 4, agreeing with the wrong framing {most_sycophantic_rate:.2f}% of the time.\n"
     )
+    summary += (
+        "\nStatistical Notes:\n"
+        "- All CIs computed using Wilson score interval.\n"
+        "- Results with CI width > 30pp are flagged as underpowered.\n"
+        "- Minimum recommended corpus size for 20pp CI: 96 kernels.\n"
+        "- Groundedness reports correct answers whose reasoning cites expected profiler evidence and avoids the primary red herring.\n"
+    )
+    if consistency_table is not None and not consistency_table.empty:
+        summary += "\nConsistency Scores\n\n" + frame_to_markdown(consistency_table) + "\n"
     output_path.write_text(summary, encoding="utf-8")
 
 
@@ -232,22 +447,45 @@ def export_scores_csv(output_dir: Path, tables: dict[str, pd.DataFrame]) -> None
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     args.results.mkdir(parents=True, exist_ok=True)
-    registry = load_registry(args.mined, args.kernels, args.profiles)
+    registry = load_registry(
+        args.mined,
+        args.kernelbot,
+        args.kernelbench_compute,
+        args.latency,
+        args.register_spill,
+        args.kernels,
+        args.profiles,
+        args.min_confidence,
+    )
+    filtered_entries = registry.filter(confidence=args.min_confidence)
+    allowed_ids = {entry.id for entry in filtered_entries}
     rows = latest_per_combo(load_results(args.results))
     df = pd.DataFrame(rows)
     if not df.empty:
-        df["correct"] = df["correct"].astype(bool)
-        df["level"] = df["level"].astype(int)
-        if "correct_reasoning" not in df.columns:
-            df["correct_reasoning"] = None
-    accuracy = accuracy_table(df, registry)
+        df["question_format"] = df.get("question_format", "label").fillna("label")
+        df = df[df["kernel_id"].isin(allowed_ids)]
+    label_df = df[(df["question_format"] == "label")] if not df.empty else df
+    if not df.empty:
+        label_df = label_df.copy()
+        if not label_df.empty:
+            label_df["correct"] = label_df["correct"].astype(bool)
+            label_df["level"] = label_df["level"].astype(int)
+            if "correct_reasoning" not in label_df.columns:
+                label_df["correct_reasoning"] = None
+    accuracy = accuracy_table(label_df, filtered_entries)
     (args.results / "accuracy_table.md").write_text(frame_to_markdown(accuracy) + "\n", encoding="utf-8")
-    write_confusion_matrices(df, args.results / "confusion_matrices")
-    level_sensitivity = write_level_sensitivity(df, args.results / "level_sensitivity.md")
-    sycophancy = write_sycophancy(df, args.results / "sycophancy_scores.md")
-    category_breakdown = write_category_breakdown(df, registry, args.results / "category_breakdown.md")
-    reasoning_quality = write_reasoning_quality(df, args.results / "reasoning_quality.md")
-    write_summary(df, args.results / "summary.md")
+    write_confusion_matrices(label_df, args.results / "confusion_matrices")
+    level_sensitivity = write_level_sensitivity(label_df, args.results / "level_sensitivity.md")
+    sycophancy = write_sycophancy(label_df, args.results / "sycophancy_scores.md")
+    category_breakdown = write_category_breakdown(label_df, filtered_entries, args.results / "category_breakdown.md")
+    reasoning_quality = write_reasoning_quality(label_df, args.results / "reasoning_quality.md")
+    groundedness = write_groundedness(label_df, registry, args.results / "groundedness_table.md")
+    consistency_detail = pd.DataFrame()
+    consistency_summary = pd.DataFrame()
+    if args.include_formats and not df.empty:
+        consistency_detail, consistency_summary = compute_consistency_scores(df)
+        (args.results / "consistency_scores.md").write_text(frame_to_markdown(consistency_summary) + "\n", encoding="utf-8")
+    write_summary(label_df, args.results / "summary.md", consistency_summary if args.include_formats else None)
     export_scores_csv(
         args.results,
         {
@@ -256,6 +494,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "sycophancy": sycophancy,
             "category_breakdown": category_breakdown,
             "reasoning_quality": reasoning_quality,
+            "groundedness": groundedness,
+            "consistency_scores": consistency_summary,
+            "consistency_detail": consistency_detail,
         },
     )
     return 0

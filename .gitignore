@@ -1,0 +1,20 @@
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg-info/
+build/
+dist/
+.coverage
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+*.swp
+*.swo
+
+# Generated profiling artifacts
+kernels/**/hw_*
+kernels/**/*.csv
+kernels/**/*.ncu-rep

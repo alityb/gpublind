@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_E",
+  "model": "gpt-5.4",
+  "level": 2,
+  "question_format": "metrics_only",
+  "true_bottleneck": "latency-bound",
+  "correct_explanation": "long-scoreboard stalls dominate because the kernel spends most of its time waiting on dependent operations rather than saturating bandwidth",
+  "predicted_label": "compute-bound",
+  "correct": false,
+  "severity": 2,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: compute-bound\n\nREASONING: The kernel is using almost none of the available DRAM bandwidth (0.05% of peak, with 100% global load efficiency), so memory bandwidth is clearly not the limiter. Occupancy is already high at 87.07% and long-scoreboard stalls are modest, which argues against latency or occupancy issues; with bandwidth not saturated, the strongest remaining signal is that throughput is limited on the compute side, even though achieved FLOPS is still low in absolute terms.",
+  "parsed_reasoning": "The kernel is using almost none of the available DRAM bandwidth (0.05% of peak, with 100% global load efficiency), so memory bandwidth is clearly not the limiter. Occupancy is already high at 87.07% and long-scoreboard stalls are modest, which argues against latency or occupancy issues; with bandwidth not saturated, the strongest remaining signal is that throughput is limited on the compute side, even though achieved FLOPS is still low in absolute terms.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 87.07%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.05%\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.05% of peak\n- Achieved FLOPS: 2.88% of peak\n- Warp stall (long scoreboard): 13.6%\n- Achieved occupancy: 87.07%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:58:20.120284+00:00"
+}

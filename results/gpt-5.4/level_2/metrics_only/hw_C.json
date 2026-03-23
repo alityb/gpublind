@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_C",
+  "model": "gpt-5.4",
+  "level": 2,
+  "question_format": "metrics_only",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": "sparse non-coalesced global loads through next_slot dominate execution despite the misleading barrier structure",
+  "predicted_label": "latency-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\n\nREASONING: The very high long-scoreboard stall rate (78.7%) indicates warps are mostly waiting on dependent memory operations to complete, which is a classic latency issue. Since occupancy is already high (92.86%) and both DRAM bandwidth (0.33%) and FLOPS (1.01%) are far from saturated, the kernel is not limited by throughput but by memory access latency that is not being effectively hidden.",
+  "parsed_reasoning": "The very high long-scoreboard stall rate (78.7%) indicates warps are mostly waiting on dependent memory operations to complete, which is a classic latency issue. Since occupancy is already high (92.86%) and both DRAM bandwidth (0.33%) and FLOPS (1.01%) are far from saturated, the kernel is not limited by throughput but by memory access latency that is not being effectively hidden.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 92.86%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.33%\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.33% of peak\n- Achieved FLOPS: 1.01% of peak\n- Warp stall (long scoreboard): 78.7%\n- Achieved occupancy: 92.86%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:56:20.138091+00:00"
+}

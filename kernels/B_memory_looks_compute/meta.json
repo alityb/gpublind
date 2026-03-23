@@ -2,6 +2,7 @@
   "id": "hw_B",
   "category": "memory_looks_compute",
   "true_bottleneck": "latency-bound",
+  "correct_explanation": "arithmetic dependency chains create long scoreboard stalls that prevent warp hiding",
   "misleading_signal": "the kernel performs a clean streaming load/store pattern, so it looks like a bandwidth-limited map over contiguous memory",
   "difficulty": "hard",
   "hardware": "A100",

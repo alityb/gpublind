@@ -28,3 +28,5 @@ def test_filter_ground_truth_verified_excludes_kernelbot_sentinels(tmp_path: Pat
     assert all(entry.ncu_profile.raw.get("ground_truth_verified", True) is True for entry in verified)
     assert all(entry.source == "kernelbot" for entry in unverified)
     assert all(entry.ncu_profile.raw.get("ground_truth_verified") is False for entry in unverified)
+    medium_confidence = registry.filter(confidence="medium")
+    assert all(entry.source != "kernelbot" for entry in medium_confidence)

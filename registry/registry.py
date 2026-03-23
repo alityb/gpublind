@@ -11,6 +11,23 @@ def ground_truth_verified(entry: KernelEntry) -> bool:
     return bool(entry.ncu_profile.raw.get("ground_truth_verified", True))
 
 
+def verification_confidence(entry: KernelEntry) -> str:
+    if not ground_truth_verified(entry):
+        return "low"
+    verification = entry.ncu_profile.verification or {}
+    confidence = verification.get("confidence")
+    if isinstance(confidence, str):
+        return confidence
+    return "medium"
+
+
+def confidence_meets_threshold(actual: str, threshold: str) -> bool:
+    ordering = {"low": 0, "medium": 1, "high": 2}
+    if threshold == "any":
+        return True
+    return ordering.get(actual, 0) >= ordering.get(threshold, 1)
+
+
 class KernelRegistry:
     def __init__(self, profile_dir: Path, mock: bool = False):
         self.profile_dir = Path(profile_dir)
@@ -45,7 +62,7 @@ class KernelRegistry:
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
             kernel_id = str(meta["id"])
             profile_path = self.profile_dir / f"{kernel_id}.json"
-            if self.mock and not profile_path.exists():
+            if self.mock:
                 fixture_path = self.profile_dir / "fixtures" / f"{kernel_id}.json"
                 if fixture_path.exists():
                     profile_path = fixture_path
@@ -64,6 +81,8 @@ class KernelRegistry:
                 category=meta["category"],
                 difficulty=meta["difficulty"],
                 hardware=meta.get("hardware", "A100"),
+                correct_explanation=meta.get("correct_explanation"),
+                reasoning_rubric=dict(meta["reasoning_rubric"]) if isinstance(meta.get("reasoning_rubric"), dict) else None,
                 ncu_profile=profile,
                 task_id=None,
             )
@@ -79,6 +98,7 @@ class KernelRegistry:
         difficulty: Optional[str] = None,
         true_bottleneck: Optional[BottleneckLabel] = None,
         ground_truth_verified: Optional[bool] = None,
+        confidence: Optional[str] = None,
     ) -> list[KernelEntry]:
         entries = list(self._entries.values())
         if source is not None:
@@ -91,6 +111,8 @@ class KernelRegistry:
             entries = [entry for entry in entries if entry.true_bottleneck == true_bottleneck]
         if ground_truth_verified is not None:
             entries = [entry for entry in entries if ground_truth_verified == bool(entry.ncu_profile.raw.get("ground_truth_verified", True))]
+        if confidence is not None:
+            entries = [entry for entry in entries if confidence_meets_threshold(verification_confidence(entry), confidence)]
         return sorted(entries, key=lambda entry: entry.id)
 
     def __len__(self) -> int:

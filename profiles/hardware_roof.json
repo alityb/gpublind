@@ -1,6 +1,6 @@
 {
-  "gpu_name": "Mock A100",
-  "peak_bw_tbps": 1.85,
-  "peak_flops_tflops": 68.0,
+  "gpu_name": "NVIDIA A10G",
+  "peak_bw_tbps": 0.495687,
+  "peak_flops_tflops": 30.769767,
   "measured": true
 }

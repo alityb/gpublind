@@ -1,12 +1,23 @@
 from __future__ import annotations
 
+import json
 import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
 from data.mine_kernelbot import build_mock_rows as build_kernelbot_rows, mine_candidates as mine_kernelbot_candidates, write_jsonl as write_kernelbot_jsonl
 from data.mine_sakana import build_mock_rows as build_sakana_rows, mine_candidates as mine_sakana_candidates, write_jsonl as write_sakana_jsonl
-from eval.run_eval import call_model, main, parse_response, score_prediction, wrong_label_for
+from eval.run_eval import (
+    call_model,
+    main,
+    parse_assessment,
+    parse_question_formats,
+    parse_rank,
+    parse_response,
+    parse_yesno,
+    score_prediction,
+    wrong_label_for,
+)
 from profiles.generate_profiles import write_mock_fixtures
 from registry.kernel_entry import SEVERITY
 
@@ -27,6 +38,33 @@ def test_parse_response_missing_reasoning() -> None:
     label, reasoning = parse_response("BOTTLENECK: compute-bound")
     assert label == "compute-bound"
     assert reasoning == ""
+
+
+def test_parse_yesno_returns_expected_mapping() -> None:
+    assert parse_yesno("MEMORY_BOUND: YES\nREASONING: because") == "memory-bound"
+    assert parse_yesno("MEMORY_BOUND: NO\nREASONING: because") == "not-memory-bound"
+
+
+def test_parse_rank_extracts_ordered_labels() -> None:
+    ranking = parse_rank(
+        "RANK_1: latency-bound\nRANK_2: memory-bound\nRANK_3: compute-bound\nRANK_4: occupancy-limited\nRANK_5: register-spill"
+    )
+    assert ranking == [
+        "latency-bound",
+        "memory-bound",
+        "compute-bound",
+        "occupancy-limited",
+        "register-spill",
+    ]
+
+
+def test_parse_assessment_extracts_agreement() -> None:
+    assert parse_assessment("ASSESSMENT: AGREE\nREASONING: yes") == "AGREE"
+    assert parse_assessment("ASSESSMENT: DISAGREE\nREASONING: no") == "DISAGREE"
+
+
+def test_parse_question_formats_supports_multiple_variants() -> None:
+    assert parse_question_formats("label,yesno_memory,rank") == ["label", "yesno_memory", "rank"]
 
 
 def test_scoring_logic_uses_severity_matrix() -> None:
@@ -66,6 +104,7 @@ def test_call_model_retries_rate_limit_then_succeeds() -> None:
         mock=False,
         entry=SimpleNamespace(id="kernel_x"),
         level=1,
+        question_format="label",
         completion_fn=fake_completion,
         sleep_fn=lambda seconds: state["sleeps"].append(seconds),
     )
@@ -73,7 +112,7 @@ def test_call_model_retries_rate_limit_then_succeeds() -> None:
     assert api_error is False
     assert "BOTTLENECK: memory-bound" in raw_response
     assert state["calls"] == 2
-    assert state["sleeps"] == [2.0, 0.5]
+    assert state["sleeps"] == [1.0, 0.5]
 
 
 def test_dry_run_prints_cost_estimate_and_writes_no_results(tmp_path: Path, capsys: object) -> None:
@@ -128,6 +167,8 @@ def test_run_eval_uses_real_profile_jsons_with_mock_llm(tmp_path: Path) -> None:
             "1",
             "--filter",
             "source=handwritten",
+            "--min-confidence",
+            "any",
             "--kernels",
             "kernels",
             "--profiles",
@@ -138,8 +179,8 @@ def test_run_eval_uses_real_profile_jsons_with_mock_llm(tmp_path: Path) -> None:
     )
 
     assert exit_code == 0
-    result_files = list((output_dir / "gpt-5.4" / "level_1").glob("*.json"))
-    assert len(result_files) == 5
+    result_files = list((output_dir / "gpt-5.4" / "trial_1" / "level_1").glob("*.json"))
+    assert len(result_files) == 8
 
 
 def test_run_eval_supports_mock_profiles_and_mock_llm(tmp_path: Path) -> None:
@@ -157,6 +198,8 @@ def test_run_eval_supports_mock_profiles_and_mock_llm(tmp_path: Path) -> None:
             "1",
             "--filter",
             "source=handwritten",
+            "--min-confidence",
+            "any",
             "--kernels",
             "kernels",
             "--profiles",
@@ -167,5 +210,42 @@ def test_run_eval_supports_mock_profiles_and_mock_llm(tmp_path: Path) -> None:
     )
 
     assert exit_code == 0
-    result_files = list((output_dir / "gpt-5.4" / "level_1").glob("*.json"))
-    assert len(result_files) == 5
+    result_files = list((output_dir / "gpt-5.4" / "trial_1" / "level_1").glob("*.json"))
+    assert len(result_files) == 8
+
+
+def test_run_eval_writes_nested_results_for_multiple_question_formats(tmp_path: Path) -> None:
+    profiles_dir = tmp_path / "profiles"
+    output_dir = tmp_path / "results"
+    write_mock_fixtures(profiles_dir)
+
+    exit_code = main(
+        [
+            "--model",
+            "gpt-5.4",
+            "--mock-profiles",
+            "--mock-llm",
+            "--levels",
+            "1",
+            "--filter",
+            "source=handwritten",
+            "--question-formats",
+            "label,yesno_memory,rank,junior_wrong",
+            "--min-confidence",
+            "any",
+            "--kernels",
+            "kernels",
+            "--profiles",
+            str(profiles_dir),
+            "--output",
+            str(output_dir),
+        ]
+    )
+
+    assert exit_code == 0
+    for fmt in ["label", "yesno_memory", "rank", "junior_wrong"]:
+        result_files = list((output_dir / "gpt-5.4" / "trial_1" / "level_1" / fmt).glob("*.json"))
+        assert len(result_files) == 8
+    sample = json.loads((output_dir / "gpt-5.4" / "trial_1" / "level_1" / "rank" / "hw_A.json").read_text(encoding="utf-8"))
+    assert sample["question_format"] == "rank"
+    assert sample["parsed_ranking"][0] == sample["true_bottleneck"]

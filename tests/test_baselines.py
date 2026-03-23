@@ -15,6 +15,7 @@ def make_entry(kernel_id: str, label: str) -> KernelEntry:
         category=label,
         difficulty="easy",
         hardware="A100",
+        correct_explanation="test explanation",
         ncu_profile=NCUProfile(
             arithmetic_intensity=1.0,
             memory_bound=label == "memory-bound",

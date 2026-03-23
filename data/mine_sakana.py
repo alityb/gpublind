@@ -191,6 +191,7 @@ def make_entry(item: dict[str, Any]) -> KernelEntry | None:
         hardware=hardware,
         ncu_profile=profile,
         task_id=task_id,
+        correct_explanation=None,
     )
 
 

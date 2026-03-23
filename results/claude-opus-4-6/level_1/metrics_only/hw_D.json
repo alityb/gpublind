@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_D",
+  "model": "claude-opus-4-6",
+  "level": 1,
+  "question_format": "metrics_only",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": "large shared-memory tiles collapse occupancy and leave too few warps to hide latency",
+  "predicted_label": "latency-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: Both achieved memory bandwidth and achieved FLOPS are at 0.0% of peak, meaning the kernel is neither saturating compute nor memory resources \u2014 it is simply waiting. The low occupancy (35.03%) means there are insufficient warps to hide latency, and the lack of significant long scoreboard stalls suggests the latency is not from memory dependency but rather from other sources such as synchronization, small grid launches, or instruction-level serialization that leave the GPU mostly idle. This pattern is characteristic of a latency-bound kernel where insufficient parallelism prevents the hardware from doing useful work.",
+  "parsed_reasoning": "Both achieved memory bandwidth and achieved FLOPS are at 0.0% of peak, meaning the kernel is neither saturating compute nor memory resources \u2014 it is simply waiting. The low occupancy (35.03%) means there are insufficient warps to hide latency, and the lack of significant long scoreboard stalls suggests the latency is not from memory dependency but rather from other sources such as synchronization, small grid launches, or instruction-level serialization that leave the GPU mostly idle. This pattern is characteristic of a latency-bound kernel where insufficient parallelism prevents the hardware from doing useful work.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.0% of peak\n- Achieved FLOPS: 0.0% of peak\n- Warp stall (long scoreboard): 5.61%\n- Achieved occupancy: 35.03%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:36:43.569898+00:00"
+}

@@ -1,0 +1,30 @@
+{
+  "arithmetic_intensity": 44.0,
+  "memory_bound": false,
+  "compute_bound": false,
+  "dominant_stall_type": "occupancy_collapse",
+  "global_load_efficiency": 0.95,
+  "achieved_occupancy": 0.18,
+  "stall_long_sb_pct": 0.29,
+  "stall_mem_pct": 0.06,
+  "register_count": 72,
+  "l2_hit_rate": 0.91,
+  "dram_bw_utilization": 0.12,
+  "verification": {
+    "roofline": "occupancy-limited",
+    "bandwidth": "occupancy-limited",
+    "stall": "occupancy-limited",
+    "consensus": "occupancy-limited",
+    "confidence": "high"
+  },
+  "raw": {
+    "ridge_point": 36.75675675675676,
+    "latency_ms": 3.8,
+    "roof": {
+      "gpu_name": "Mock A100",
+      "peak_bw_tbps": 1.85,
+      "peak_flops_tflops": 68.0,
+      "measured": true
+    }
+  }
+}

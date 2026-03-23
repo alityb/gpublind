@@ -44,19 +44,89 @@ def ridge_point_for(roof: dict[str, Any]) -> float:
 
 def parse_metric_csv(csv_path: Path) -> dict[str, float]:
     metrics: dict[str, float] = {}
-    with csv_path.open("r", encoding="utf-8") as handle:
-        reader = csv.DictReader(handle)
-        for row in reader:
-            name = row.get("Metric Name") or row.get("metric") or row.get("ID")
-            value = row.get("Metric Value") or row.get("value") or row.get("Metric Value (raw)")
-            if not name or value is None:
+
+    raw = csv_path.read_text(encoding="utf-8")
+    csv_lines = [
+        line for line in raw.splitlines() if line.strip() and line.startswith('"')
+    ]
+    if len(csv_lines) < 3:
+        return metrics
+
+    # Row 0: headers, Row 1: units (skip), Row 2+: data.
+    import io
+
+    reader = csv.DictReader(io.StringIO("\n".join([csv_lines[0]] + csv_lines[2:])))
+
+    for row in reader:
+        for col, val in row.items():
+            if not col or not val:
                 continue
-            cleaned = str(value).replace(",", "").replace("%", "")
+            cleaned = str(val).replace(",", "").strip()
             try:
-                metrics[str(name)] = float(cleaned)
+                metrics[col] = float(cleaned)
             except ValueError:
                 continue
+        break  # only need the first data row
+
     return metrics
+
+
+def stall_label_from_type(dominant_stall_type: str, profile: NCUProfile) -> str:
+    dominant = dominant_stall_type.lower()
+    if "register" in dominant:
+        return "register-spill"
+    if "occupancy" in dominant:
+        return "occupancy-limited"
+    if "memory" in dominant:
+        return "memory-bound"
+    if "arithmetic" in dominant or dominant in {"latency-bound", "long_scoreboard"}:
+        return "latency-bound"
+    if dominant == "compute":
+        return "compute-bound"
+    if profile.achieved_occupancy < 0.40:
+        return "occupancy-limited"
+    return "compute-bound"
+
+
+def verify_label(profile: NCUProfile, roof: dict[str, Any]) -> dict[str, str]:
+    ridge_point = float(profile.raw.get("ridge_point", ridge_point_for(roof)))
+    if profile.register_count >= 255 and profile.stall_long_sb_pct > 0.20:
+        roofline = "register-spill"
+    elif profile.achieved_occupancy < 0.10:
+        roofline = "occupancy-limited"
+    elif profile.arithmetic_intensity < ridge_point:
+        roofline = "memory-bound"
+    else:
+        roofline = "compute-bound"
+    if profile.register_count >= 255 and profile.stall_long_sb_pct > 0.20 and profile.dram_bw_utilization < 0.25:
+        bandwidth = "register-spill"
+    elif profile.achieved_occupancy < 0.10:
+        bandwidth = "occupancy-limited"
+    elif profile.dram_bw_utilization > 0.50:
+        bandwidth = "memory-bound"
+    elif profile.stall_long_sb_pct > 0.30 and profile.dram_bw_utilization < 0.10:
+        bandwidth = "latency-bound"
+    else:
+        bandwidth = "compute-bound"
+    stall = stall_label_from_type(profile.dominant_stall_type, profile)
+    votes = [roofline, bandwidth, stall]
+    counts: dict[str, int] = {}
+    for vote in votes:
+        counts[vote] = counts.get(vote, 0) + 1
+    consensus_label, consensus_count = max(counts.items(), key=lambda item: item[1])
+    if consensus_count >= 2:
+        consensus = consensus_label
+        confidence = "high" if consensus_count == 3 else "medium"
+    else:
+        consensus = "ambiguous"
+        confidence = "low"
+    return {
+        "roofline": roofline,
+        "bandwidth": bandwidth,
+        "stall": stall,
+        "consensus": consensus,
+        "confidence": confidence,
+    }
 
 
 def derive_profile(metrics: dict[str, float], roof: dict[str, Any]) -> NCUProfile:
@@ -69,32 +139,45 @@ def derive_profile(metrics: dict[str, float], roof: dict[str, Any]) -> NCUProfil
     stall_long = metrics.get("smsp__warp_issue_stalled_long_scoreboard_per_warp_active.pct", 0.0) / 100.0
     stall_short = metrics.get("smsp__warp_issue_stalled_short_scoreboard_per_warp_active.pct", 0.0) / 100.0
     stall_mem = metrics.get("smsp__warp_issue_stalled_membar_per_warp_active.pct", 0.0) / 100.0
-    dominant_stall = max(
-        {
-            "long_scoreboard": stall_long,
-            "short_scoreboard": stall_short,
-            "memory_dependency": stall_mem,
-        }.items(),
-        key=lambda item: item[1],
-    )[0]
     miss_count = metrics.get("sm__sass_l1tex_data_pipe_lsu_wavefronts_mem_global_ld_sectors_miss.sum", 0.0)
     request_count = max(metrics.get("l2__global_load_requests.sum", 1.0), 1.0)
     load_efficiency = max(0.0, min(1.0, 1.0 - (miss_count / request_count)))
     dram_bw_utilization = max(0.0, min(1.0, total_bytes / (float(roof["peak_bw_tbps"]) * 1.0e12)))
-    return NCUProfile(
+    achieved_occupancy = metrics.get("sm__warps_active.avg.pct_of_peak_sustained_active", 0.0) / 100.0
+    register_count = int(metrics.get("launch__registers_per_thread", 64.0))
+    if register_count >= 255:
+        dominant_stall = "register_spill"
+    elif achieved_occupancy < 0.10:
+        dominant_stall = "occupancy_collapse"
+    elif arithmetic_intensity >= ridge_point and stall_long < 0.20 and dram_bw_utilization < 0.50:
+        dominant_stall = "compute"
+    elif stall_long > 0.30 and dram_bw_utilization < 0.15:
+        dominant_stall = "latency-bound"
+    elif stall_long > 0.25 and dram_bw_utilization < 0.15:
+        dominant_stall = "arithmetic_dependency"
+    elif stall_long > 0.25 and dram_bw_utilization >= 0.15:
+        dominant_stall = "memory_dependency"
+    elif stall_mem > stall_long:
+        dominant_stall = "memory_dependency"
+    else:
+        dominant_stall = "long_scoreboard"
+    profile = NCUProfile(
         arithmetic_intensity=arithmetic_intensity,
         memory_bound=arithmetic_intensity < ridge_point,
         compute_bound=arithmetic_intensity >= ridge_point,
         dominant_stall_type=dominant_stall,
         global_load_efficiency=load_efficiency,
-        achieved_occupancy=metrics.get("sm__warps_active.avg.pct_of_peak_sustained_active", 0.0) / 100.0,
+        achieved_occupancy=achieved_occupancy,
         stall_long_sb_pct=stall_long,
         stall_mem_pct=stall_mem,
-        register_count=int(metrics.get("launch__registers_per_thread", 64.0)),
+        register_count=register_count,
         l2_hit_rate=load_efficiency,
         dram_bw_utilization=dram_bw_utilization,
         raw={**metrics, "ridge_point": ridge_point, "roof": roof},
     )
+    profile.verification = verify_label(profile, roof)
+    profile.raw = {**profile.raw, "verification": profile.verification}
+    return profile
 
 
 def compile_kernel(source_path: Path, binary_path: Path) -> None:
@@ -102,7 +185,7 @@ def compile_kernel(source_path: Path, binary_path: Path) -> None:
 
 
 def run_ncu(binary_path: Path, output_prefix: Path) -> Path:
-    subprocess.run(
+    result = subprocess.run(
         [
             "ncu",
             "--csv",
@@ -110,16 +193,15 @@ def run_ncu(binary_path: Path, output_prefix: Path) -> Path:
             "raw",
             "--metrics",
             ",".join(METRICS),
-            "-o",
-            str(output_prefix),
             str(binary_path),
         ],
+        capture_output=True,
+        text=True,
         check=True,
     )
     csv_candidate = output_prefix.with_suffix(".csv")
-    if csv_candidate.exists():
-        return csv_candidate
-    return output_prefix.parent / f"{output_prefix.name}.csv"
+    csv_candidate.write_text(result.stdout, encoding="utf-8")
+    return csv_candidate
 
 
 def fixture_payloads() -> dict[str, dict[str, Any]]:
@@ -138,6 +220,13 @@ def fixture_payloads() -> dict[str, dict[str, Any]]:
             "register_count": 64,
             "l2_hit_rate": 0.22,
             "dram_bw_utilization": 0.84,
+            "verification": {
+                "roofline": "memory-bound",
+                "bandwidth": "memory-bound",
+                "stall": "memory-bound",
+                "consensus": "memory-bound",
+                "confidence": "high",
+            },
             "raw": {"ridge_point": ridge_point, "latency_ms": 2.4, "roof": roof},
         },
         "hw_B": {
@@ -152,6 +241,13 @@ def fixture_payloads() -> dict[str, dict[str, Any]]:
             "register_count": 72,
             "l2_hit_rate": 0.88,
             "dram_bw_utilization": 0.29,
+            "verification": {
+                "roofline": "memory-bound",
+                "bandwidth": "latency-bound",
+                "stall": "latency-bound",
+                "consensus": "latency-bound",
+                "confidence": "medium",
+            },
             "raw": {"ridge_point": ridge_point, "latency_ms": 1.7, "roof": roof},
         },
         "hw_C": {
@@ -166,6 +262,13 @@ def fixture_payloads() -> dict[str, dict[str, Any]]:
             "register_count": 56,
             "l2_hit_rate": 0.34,
             "dram_bw_utilization": 0.77,
+            "verification": {
+                "roofline": "memory-bound",
+                "bandwidth": "memory-bound",
+                "stall": "memory-bound",
+                "consensus": "memory-bound",
+                "confidence": "high",
+            },
             "raw": {"ridge_point": ridge_point, "latency_ms": 2.0, "roof": roof},
         },
         "hw_D": {
@@ -180,6 +283,13 @@ def fixture_payloads() -> dict[str, dict[str, Any]]:
             "register_count": 88,
             "l2_hit_rate": 0.79,
             "dram_bw_utilization": 0.36,
+            "verification": {
+                "roofline": "memory-bound",
+                "bandwidth": "occupancy-limited",
+                "stall": "latency-bound",
+                "consensus": "ambiguous",
+                "confidence": "low",
+            },
             "raw": {"ridge_point": ridge_point, "latency_ms": 2.8, "roof": roof},
         },
         "hw_E": {
@@ -194,7 +304,77 @@ def fixture_payloads() -> dict[str, dict[str, Any]]:
             "register_count": 164,
             "l2_hit_rate": 0.41,
             "dram_bw_utilization": 0.48,
+            "verification": {
+                "roofline": "memory-bound",
+                "bandwidth": "compute-bound",
+                "stall": "register-spill",
+                "consensus": "ambiguous",
+                "confidence": "low",
+            },
             "raw": {"ridge_point": ridge_point, "latency_ms": 2.2, "roof": roof},
+        },
+        "hw_F": {
+            "arithmetic_intensity": 128.0,
+            "memory_bound": False,
+            "compute_bound": True,
+            "dominant_stall_type": "compute",
+            "global_load_efficiency": 0.98,
+            "achieved_occupancy": 0.76,
+            "stall_long_sb_pct": 0.08,
+            "stall_mem_pct": 0.04,
+            "register_count": 96,
+            "l2_hit_rate": 0.94,
+            "dram_bw_utilization": 0.21,
+            "verification": {
+                "roofline": "compute-bound",
+                "bandwidth": "compute-bound",
+                "stall": "compute-bound",
+                "consensus": "compute-bound",
+                "confidence": "high"
+            },
+            "raw": {"ridge_point": ridge_point, "latency_ms": 3.1, "roof": roof},
+        },
+        "hw_G": {
+            "arithmetic_intensity": 44.0,
+            "memory_bound": False,
+            "compute_bound": False,
+            "dominant_stall_type": "occupancy_collapse",
+            "global_load_efficiency": 0.95,
+            "achieved_occupancy": 0.18,
+            "stall_long_sb_pct": 0.29,
+            "stall_mem_pct": 0.06,
+            "register_count": 72,
+            "l2_hit_rate": 0.91,
+            "dram_bw_utilization": 0.12,
+            "verification": {
+                "roofline": "occupancy-limited",
+                "bandwidth": "occupancy-limited",
+                "stall": "occupancy-limited",
+                "consensus": "occupancy-limited",
+                "confidence": "high"
+            },
+            "raw": {"ridge_point": ridge_point, "latency_ms": 3.8, "roof": roof},
+        },
+        "hw_H": {
+            "arithmetic_intensity": 36.0,
+            "memory_bound": False,
+            "compute_bound": False,
+            "dominant_stall_type": "register_spill",
+            "global_load_efficiency": 0.37,
+            "achieved_occupancy": 0.52,
+            "stall_long_sb_pct": 0.41,
+            "stall_mem_pct": 0.09,
+            "register_count": 255,
+            "l2_hit_rate": 0.43,
+            "dram_bw_utilization": 0.11,
+            "verification": {
+                "roofline": "register-spill",
+                "bandwidth": "register-spill",
+                "stall": "register-spill",
+                "consensus": "register-spill",
+                "confidence": "high"
+            },
+            "raw": {"ridge_point": ridge_point, "latency_ms": 2.9, "roof": roof},
         },
     }
 

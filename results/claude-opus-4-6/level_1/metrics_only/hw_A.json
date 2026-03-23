@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_A",
+  "model": "claude-opus-4-6",
+  "level": 1,
+  "question_format": "metrics_only",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": "irregular global memory accesses reduce load efficiency and make memory traffic dominate runtime",
+  "predicted_label": "latency-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: Both achieved memory bandwidth (0.01%) and achieved FLOPS (4.76%) are extremely low, meaning the hardware is barely doing useful work despite decent occupancy (82.7%). The dominant warp stall reason is \"long scoreboard\" at 44.73%, which indicates warps are stalled waiting for long-latency operations (typically memory requests) to complete \u2014 but since bandwidth utilization is negligible, this points to latency-bound behavior from dependent memory accesses (e.g., pointer chasing, small irregular accesses) rather than a streaming bandwidth bottleneck. The kernel is unable to generate enough parallel memory requests to saturate bandwidth or keep compute units busy, leaving execution dominated by idle stalls waiting on individual high-latency operations.",
+  "parsed_reasoning": "Both achieved memory bandwidth (0.01%) and achieved FLOPS (4.76%) are extremely low, meaning the hardware is barely doing useful work despite decent occupancy (82.7%). The dominant warp stall reason is \"long scoreboard\" at 44.73%, which indicates warps are stalled waiting for long-latency operations (typically memory requests) to complete \u2014 but since bandwidth utilization is negligible, this points to latency-bound behavior from dependent memory accesses (e.g., pointer chasing, small irregular accesses) rather than a streaming bandwidth bottleneck. The kernel is unable to generate enough parallel memory requests to saturate bandwidth or keep compute units busy, leaving execution dominated by idle stalls waiting on individual high-latency operations.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.01% of peak\n- Achieved FLOPS: 4.76% of peak\n- Warp stall (long scoreboard): 44.73%\n- Achieved occupancy: 82.7%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:25:26.193356+00:00"
+}

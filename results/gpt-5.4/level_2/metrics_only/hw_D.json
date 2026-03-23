@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_D",
+  "model": "gpt-5.4",
+  "level": 2,
+  "question_format": "metrics_only",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": "large shared-memory tiles collapse occupancy and leave too few warps to hide latency",
+  "predicted_label": "occupancy-limited",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: occupancy-limited\n\nREASONING: The kernel shows very low achieved occupancy at 35.03%, while both achieved memory bandwidth and FLOPS are essentially 0%, so it is not meaningfully stressing either the memory system or compute pipelines. The low long-scoreboard stall rate also argues against a memory-latency bottleneck, making limited occupancy the most plausible primary constraint from the given metrics.",
+  "parsed_reasoning": "The kernel shows very low achieved occupancy at 35.03%, while both achieved memory bandwidth and FLOPS are essentially 0%, so it is not meaningfully stressing either the memory system or compute pipelines. The low long-scoreboard stall rate also argues against a memory-latency bottleneck, making limited occupancy the most plausible primary constraint from the given metrics.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 35.03%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.0%\n\nWithout seeing the kernel code, given only these metrics:\n- Achieved memory bandwidth: 0.0% of peak\n- Achieved FLOPS: 0.0% of peak\n- Warp stall (long scoreboard): 5.61%\n- Achieved occupancy: 35.03%\n\nWhat is the primary bottleneck?\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:57:14.488184+00:00"
+}

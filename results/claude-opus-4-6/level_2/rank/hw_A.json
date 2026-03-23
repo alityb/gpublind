@@ -1,0 +1,30 @@
+{
+  "kernel_id": "hw_A",
+  "model": "claude-opus-4-6",
+  "level": 2,
+  "question_format": "rank",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": "irregular global memory accesses reduce load efficiency and make memory traffic dominate runtime",
+  "predicted_label": "compute-bound",
+  "correct": false,
+  "severity": 2,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "RANK_1: compute-bound\nRANK_2: latency-bound\nRANK_3: memory-bound\nRANK_4: register-spill\nRANK_5: occupancy-limited\n\nREASONING: The kernel has extremely low DRAM bandwidth utilization (0.01%) despite 100% global load efficiency, meaning data is served from cache and the memory subsystem is not stressed. Meanwhile, each loop iteration performs numerous arithmetic operations (multiplies, adds, subtracts) on only two loaded values across 8 unrolled iterations, giving a very high compute-to-memory ratio. Occupancy at 82.7% is healthy, ruling out occupancy limitations, and the near-zero latency suggests a small problem size but the dominant limiter for scaling would be ALU throughput.",
+  "parsed_reasoning": "The kernel has extremely low DRAM bandwidth utilization (0.01%) despite 100% global load efficiency, meaning data is served from cache and the memory subsystem is not stressed. Meanwhile, each loop iteration performs numerous arithmetic operations (multiplies, adds, subtracts) on only two loaded values across 8 unrolled iterations, giving a very high compute-to-memory ratio. Occupancy at 82.7% is healthy, ruling out occupancy limitations, and the near-zero latency suggests a small problem size but the dominant limiter for scaling would be ALU throughput.",
+  "parsed_ranking": [
+    "compute-bound",
+    "latency-bound",
+    "memory-bound",
+    "register-spill",
+    "occupancy-limited"
+  ],
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 82.7%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.01%\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void traversal_kernel(const float* values, const float* weights, float* out, int n, int tile_span) {\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    if (tid >= n) {\n        return;\n    }\n\n    int tile_id = tid >> 5;\n    int lane = tid & 31;\n    int tile_base = (tile_id * tile_span + ((lane & 7) << 1) + (lane >> 3)) & (n - 1);\n    float acc = 0.0f;\n\n    // process tile elements\n    #pragma unroll\n    for (int step = 0; step < 8; ++step) {\n        int edge_slot = (tile_base + step * tile_span + (lane & 3)) & (n - 1);\n        float x = values[edge_slot];\n        float y = weights[edge_slot];\n        acc = acc + x * y;\n        acc = acc + x * 0.375f;\n        acc = acc - y * 0.125f;\n        acc = acc + x * y * 0.50f;\n        acc = acc + x * x;\n        acc = acc - y * y;\n        acc = acc + (x + y) * 0.75f;\n        acc = acc - (x - y) * 0.25f;\n    }\n\n    out[tid] = acc;\n}\n\nint main() {\n    const int n = 1 << 20;\n    const int tile_span = 96;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float* h = new float[n];\n    float *values, *weights, *out;\n    cudaMalloc(&values, bytes);\n    cudaMalloc(&weights, bytes);\n    cudaMalloc(&out, bytes);\n    for (int i = 0; i < n; ++i) {\n        h[i] = static_cast<float>(i % 251) * 0.01f;\n    }\n    cudaMemcpy(values, h, bytes, cudaMemcpyHostToDevice);\n    cudaMemcpy(weights, h, bytes, cudaMemcpyHostToDevice);\n    traversal_kernel<<<(n + 255) / 256, 256>>>(values, weights, out, n, tile_span);\n    cudaMemcpy(h, out, bytes, cudaMemcpyDeviceToHost);\n    std::printf(\"%f\\n\", h[0]);\n    cudaFree(values);\n    cudaFree(weights);\n    cudaFree(out);\n    delete[] h;\n    return 0;\n}\n\n```\n\nRank these bottleneck types from most to least likely for this kernel:\nmemory-bound, compute-bound, latency-bound, occupancy-limited, register-spill\n\nFormat:\nRANK_1: <most likely>\nRANK_2: <second>\nRANK_3: <third>\nRANK_4: <fourth>\nRANK_5: <least likely>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T04:25:43.483608+00:00"
+}
