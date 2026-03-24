@@ -1,0 +1,21 @@
+{
+  "id": "kernelbot_reg_00_028",
+  "source": "kernelbot",
+  "true_bottleneck": "register-spill",
+  "misleading_signal": "large local arrays likely spill to local memory, appearing as global memory traffic",
+  "correct_explanation": "large local arrays likely spill to local memory, appearing as global memory traffic",
+  "difficulty": "medium",
+  "category": "register-spill",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "register",
+      "local memory",
+      "spill"
+    ],
+    "must_not_cite_as_primary": [
+      "global memory",
+      "bandwidth"
+    ]
+  },
+  "hardware": "A10G"
+}

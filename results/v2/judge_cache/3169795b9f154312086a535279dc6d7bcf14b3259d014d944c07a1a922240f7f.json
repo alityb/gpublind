@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the latency-bound bottleneck with high confidence, cites specific metric values (45.0% long scoreboard stalls, 0.0% DRAM BW utilization, 55% occupancy), and correctly dismisses global memory/bandwidth as the primary cause while accurately attributing the stalls to latency from cache responses without sufficient warp-level parallelism to hide them.",
+  "judge_model": "claude-sonnet-4-6"
+}

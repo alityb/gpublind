@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy as the bottleneck, cites specific metric values (96 KB shared memory, 1 block per SM, achieved occupancy under 10%, the 35% threshold), and while it mentions the compute-heavy inner loop, it explicitly frames it as a misleading signal rather than the primary cause, with HIGH confidence appropriately matching the correct diagnosis.",
+  "judge_model": "claude-sonnet-4-6"
+}

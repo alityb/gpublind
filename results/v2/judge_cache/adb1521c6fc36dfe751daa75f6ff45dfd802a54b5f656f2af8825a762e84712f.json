@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as memory-bound (bandwidth/throughput) rather than latency-bound, ignored the dominant 84.13% Stall Long Scoreboard metric entirely, and expressed HIGH confidence in this wrong diagnosis\u2014making it both directionally wrong and overconfident.",
+  "judge_model": "claude-sonnet-4-6"
+}

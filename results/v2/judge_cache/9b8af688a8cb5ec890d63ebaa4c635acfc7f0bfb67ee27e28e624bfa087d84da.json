@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the memory-bound bottleneck with HIGH confidence, cites specific arithmetic intensity values and bandwidth-related reasoning (streaming access, DRAM bandwidth saturation), and correctly attributes the bottleneck to sustained DRAM traffic rather than the misleading hw_mem_16 mixed-access signal or forbidden primaries like dependency chains or occupancy collapse.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

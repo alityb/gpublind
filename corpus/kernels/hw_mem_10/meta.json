@@ -1,0 +1,25 @@
+{
+  "id": "hw_mem_10",
+  "source": "handwritten",
+  "true_bottleneck": "memory-bound",
+  "difficulty": "easy",
+  "category": "memory-bound",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "dram bandwidth",
+      "dram_bw",
+      "arithmetic intensity",
+      "global memory",
+      "bandwidth"
+    ],
+    "must_not_cite_as_primary": [
+      "long scoreboard",
+      "dependency chain",
+      "register spill",
+      "occupancy collapse"
+    ]
+  },
+  "misleading_signal": "elementwise max streams two input vectors and one output vector with only a compare in between",
+  "correct_explanation": "the compare is negligible relative to the amount of data moved, so DRAM bandwidth remains the binding resource"
+}

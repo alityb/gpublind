@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies latency-bound as the bottleneck with high confidence, cites the specific metric value of 84.5% Long Scoreboard stalls as primary evidence, and explicitly dismisses the misleading memory-bound signal by noting DRAM bandwidth utilization is effectively 0% rather than blaming poor memory access patterns as the root cause.",
+  "judge_model": "claude-sonnet-4-6"
+}

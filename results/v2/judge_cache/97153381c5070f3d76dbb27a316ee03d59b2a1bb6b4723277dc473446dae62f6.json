@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"memory-bound\" (DRAM saturation) rather than the true bottleneck of register-spill, and did so with HIGH confidence while primarily citing DRAM BW utilization as the root cause\u2014exactly the misleading signal it should have looked past\u2014making it both wrong and overconfident.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

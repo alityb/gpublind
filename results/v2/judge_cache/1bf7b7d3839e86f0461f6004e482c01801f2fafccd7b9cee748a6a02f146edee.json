@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM misidentified the bottleneck as \"latency-bound\" rather than \"occupancy-limited,\" dismissing the 43% achieved occupancy by applying an arbitrary <35% threshold rather than recognizing that low occupancy (relative to theoretical maximum) is itself the primary constraint; however, the MEDIUM confidence appropriately reflects uncertainty, earning calibration credit for a wrong answer given non-HIGH confidence.",
+  "judge_model": "claude-sonnet-4-6"
+}

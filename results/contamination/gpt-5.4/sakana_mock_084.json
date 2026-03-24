@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_084",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis looks like a small synthetic CUDA microbenchmark or hand-written test kernel rather than a recognizable benchmark, tutorial, or widely known codebase example. The constants and indexing pattern (`17`, `257`, `& 4095`) look arbitrary and characteristic of generated or ad hoc stress-test code."
+}

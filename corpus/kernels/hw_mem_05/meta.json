@@ -1,0 +1,25 @@
+{
+  "id": "hw_mem_05",
+  "source": "handwritten",
+  "true_bottleneck": "memory-bound",
+  "difficulty": "easy",
+  "category": "memory-bound",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "dram bandwidth",
+      "dram_bw",
+      "arithmetic intensity",
+      "global memory",
+      "bandwidth"
+    ],
+    "must_not_cite_as_primary": [
+      "long scoreboard",
+      "dependency chain",
+      "register spill",
+      "occupancy collapse"
+    ]
+  },
+  "misleading_signal": "streaming copy with a fixed offset defeats tiny-cache reuse and keeps traffic on DRAM",
+  "correct_explanation": "the kernel streams a large shifted window through memory, so every output requires a fresh global read and write"
+}

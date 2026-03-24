@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM labeled the bottleneck as \"latency-bound\" rather than \"memory-bound\" (the true bottleneck), failing Stage 1; however, its MEDIUM confidence on an incorrect diagnosis is appropriately calibrated, earning a point for CONFIDENCE_CALIBRATED.",
+  "judge_model": "claude-sonnet-4-6"
+}

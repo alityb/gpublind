@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM incorrectly identifies the bottleneck as occupancy-limited instead of recognizing the true bottleneck of register spills, thus leading to an overall incorrect assessment despite high confidence.",
+  "judge_model": "openai/gpt-4o-mini"
+}

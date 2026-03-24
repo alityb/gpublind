@@ -1,0 +1,25 @@
+{
+  "kernel_id": "kernelbench_045",
+  "model": "gpt-5.4",
+  "trial": 1,
+  "level": 3,
+  "question_format": "label",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": "multiple large matrix-style operators dominate arithmetic work and likely exceed the roofline ridge point",
+  "predicted_label": "latency-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: The profile shows all throughput metrics at 0.0% and the provided code does not launch any CUDA kernel at all\u2014it only calls `cudaDeviceSynchronize()` and prints a TODO message. Since no real GPU work executed, there is no evidence of memory, compute, occupancy, or register-spill limitation; the only \u201cbottleneck\u201d is host-side/no-op execution latency from an empty harness.",
+  "parsed_reasoning": "The profile shows all throughput metrics at 0.0% and the provided code does not launch any CUDA kernel at all\u2014it only calls `cudaDeviceSynchronize()` and prints a TODO message. Since no real GPU work executed, there is no evidence of memory, compute, occupancy, or register-spill limitation; the only \u201cbottleneck\u201d is host-side/no-op execution latency from an empty harness.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel using the full profiler output.\n\nHardware: NVIDIA A10G (peak BW: 0.496 TB/s, peak FLOPS: 30.77 TFLOPS, ridge point: 62 FLOP/byte)\n\nNCU Profile:\n{\n  \"achieved_occupancy_pct\": 0.0,\n  \"arithmetic_intensity_flop_per_byte\": 0.0,\n  \"dram_bandwidth_utilization_pct\": 0.0,\n  \"global_load_efficiency_pct\": 100.0,\n  \"l2_hit_rate_pct\": 100.0,\n  \"register_count_per_thread\": 64,\n  \"ridge_point_flop_per_byte\": 62.07,\n  \"stall_long_scoreboard_pct\": 0.0,\n  \"stall_memory_pct\": 0.0\n}\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n// KernelBench candidate 45: 45_Gemm_Sigmoid_LogSumExp\nint main() {\n  // Standalone profiling harness template generated from KernelBench PyTorch reference.\n  // TODO: materialize large matrices and call cuBLAS GEMM or grouped GEMM.\n  cudaDeviceSynchronize();\n  std::puts(\"TODO: fill in generated harness before profiling.\");\n  return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T20:43:30.198101+00:00"
+}

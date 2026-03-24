@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_05",
+  "model": "claude-opus-4-6",
+  "condition": "C2",
+  "condition_name": "code_plus_metrics",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "The kernel has essentially zero arithmetic intensity (0.00 FLOP/byte \u2014 it's a pure copy with no FLOPs), yet DRAM bandwidth utilization is only 45.2%, well below the >50% threshold for being truly memory-bound. The dominant stall reason is Long Scoreboard at 66.7% of active cycles, which indicates warps are stalled waiting for memory requests to return. The 100% L2 hit rate combined with the offset read pattern (`in[idx + 32]`) suggests the data is being served from L2 cache rather than DRAM, but the latency of L2 accesses is still not fully hidden despite 92.5% occupancy \u2014 the kernel simply lacks enough independent instructions (no compute, just load-store) to cover the memory latency pipeline.",
+  "correct": false,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: The kernel has essentially zero arithmetic intensity (0.00 FLOP/byte \u2014 it's a pure copy with no FLOPs), yet DRAM bandwidth utilization is only 45.2%, well below the >50% threshold for being truly memory-bound. The dominant stall reason is Long Scoreboard at 66.7% of active cycles, which indicates warps are stalled waiting for memory requests to return. The 100% L2 hit rate combined with the offset read pattern (`in[idx + 32]`) suggests the data is being served from L2 cache rather than DRAM, but the latency of L2 accesses is still not fully hidden despite 92.5% occupancy \u2014 the kernel simply lacks enough independent instructions (no compute, just load-store) to cover the memory latency pipeline.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel.\n\nHardware performance counters (NVIDIA A10G):\nArithmetic Intensity: 0.00 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 92.5%\nDRAM Bandwidth Utilization: 45.2% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 66.7% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 22\n\nSource code:\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void offset_copy_kernel(const float* __restrict__ in, float* __restrict__ out, int n) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    while (idx < n - 32) {\n        out[idx] = in[idx + 32];\n        idx += stride;\n    }\n}\n\nint main() {\n    const int n = 1 << 26;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_in, *d_out;\n    cudaMalloc(&d_in, bytes);\n    cudaMalloc(&d_out, bytes);\n    cudaMemset(d_in, 4, bytes);\n    offset_copy_kernel<<<4096, 256>>>(d_in, d_out, n);\n    cudaDeviceSynchronize();\n    offset_copy_kernel<<<4096, 256>>>(d_in, d_out, n);\n    cudaDeviceSynchronize();\n    float h_out = 0.0f;\n    cudaMemcpy(&h_out, d_out, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h_out);\n    cudaFree(d_in);\n    cudaFree(d_out);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 0,
+    "stage_2_rvr": null,
+    "stage_3_mpr": null,
+    "confidence_calibrated": 0,
+    "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" instead of \"memory-bound\" (the true bottleneck), and did so with HIGH confidence, making it an overconfident error that fails both the direction and calibration checks.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

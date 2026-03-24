@@ -1,0 +1,25 @@
+{
+  "id": "hw_lat_05",
+  "source": "handwritten",
+  "true_bottleneck": "latency-bound",
+  "misleading_signal": "the kernel performs many global loads, but the small pointer table fits in cache so the bottleneck is latency, not DRAM bandwidth",
+  "correct_explanation": "dependent pointer-chasing loads keep warps waiting on serialized cache accesses, so long-scoreboard stalls stay high while DRAM utilization remains low",
+  "difficulty": "medium",
+  "category": "latency-bound",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "stall_long_scoreboard_pct",
+      "long scoreboard",
+      "dram_bw_utilization_pct",
+      "dependency chain",
+      "pointer chasing"
+    ],
+    "must_not_cite_as_primary": [
+      "memory bandwidth",
+      "global load efficiency",
+      "coalescing",
+      "dram saturation"
+    ]
+  }
+}

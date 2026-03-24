@@ -1,0 +1,21 @@
+{
+  "kernel_ids": [
+    "hw_B",
+    "hw_F",
+    "hw_G",
+    "hw_H",
+    "sakana_mock_042",
+    "sakana_mock_108",
+    "sakana_mock_138"
+  ],
+  "counts": {
+    "compute-bound": 1,
+    "latency-bound": 1,
+    "memory-bound": 3,
+    "occupancy-limited": 1,
+    "register-spill": 1
+  },
+  "memory_share": 42.86,
+  "min_confidence": "medium",
+  "seed": 7
+}

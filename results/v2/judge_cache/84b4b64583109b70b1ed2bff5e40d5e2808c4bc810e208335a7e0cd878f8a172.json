@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 0,
+  "confidence_calibrated": 0,
+  "explanation": "While the bottleneck label is correct and specific metrics are cited (0.75 FLOP/byte, DRAM utilization), the response fails STAGE_3 because it never cites the required \"stall_long/long scoreboard/dependency\" metrics as primary evidence, instead primarily blaming arithmetic intensity and memory transactions as the diagnostic framework, and also fails confidence calibration because it expresses HIGH confidence yet provides an incorrect primary diagnosis pathway (roofline/memory framing rather than scoreboard stall evidence).",
+  "judge_model": "claude-sonnet-4-6"
+}

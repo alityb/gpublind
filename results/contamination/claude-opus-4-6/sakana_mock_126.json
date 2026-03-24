@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_126",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/toy microbenchmark, likely hand-crafted to test specific memory access patterns (the `& 4095` masking to keep accesses within a 4096-element range, the stride of 17, the accumulation loop with stride 257). It doesn't match any well-known benchmark suite, tutorial, or public codebase I'm aware of. It has the hallmarks of something someone wrote to experiment with cache behavior or memory throughput characteristics rather than being from an established source."
+}

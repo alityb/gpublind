@@ -1,0 +1,24 @@
+{
+  "kernel_id": "kernelbot_dep_03_011",
+  "model": "claude-opus-4-6",
+  "condition": "C0",
+  "condition_name": "code_only",
+  "true_bottleneck": "latency-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "The kernel launches with only `threadIdx.x` used for indexing, meaning each block processes only 256 elements and the total work is 2^20 elements across 4096 blocks of 256 threads. However, the core issue is that each thread performs only 6 FLOPs (3 adds + 3 multiplies) against 8 bytes of memory traffic (one float read + one float write), giving an arithmetic intensity of ~0.75 FLOP/byte \u2014 far below the ridge point of 62 FLOP/byte. Yet DRAM utilization will also be low because the total data footprint is only 4 MB (trivially small for the A10G's bandwidth), and the kernel completes in microseconds with insufficient work to saturate the memory subsystem. The combination of very low arithmetic intensity with low DRAM utilization and a serial dependency chain of 6 operations per thread (where each multiply depends on the preceding add) points to latency-bound behavior \u2014 the GPU cannot hide the instruction-level dependencies and memory latency with so little work per thread.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: The kernel launches with only `threadIdx.x` used for indexing, meaning each block processes only 256 elements and the total work is 2^20 elements across 4096 blocks of 256 threads. However, the core issue is that each thread performs only 6 FLOPs (3 adds + 3 multiplies) against 8 bytes of memory traffic (one float read + one float write), giving an arithmetic intensity of ~0.75 FLOP/byte \u2014 far below the ridge point of 62 FLOP/byte. Yet DRAM utilization will also be low because the total data footprint is only 4 MB (trivially small for the A10G's bandwidth), and the kernel completes in microseconds with insufficient work to saturate the memory subsystem. The combination of very low arithmetic intensity with low DRAM utilization and a serial dependency chain of 6 operations per thread (where each multiply depends on the preceding add) points to latency-bound behavior \u2014 the GPU cannot hide the instruction-level dependencies and memory latency with so little work per thread.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel\nrunning on an NVIDIA A10G GPU (ridge point: 62 FLOP/byte).\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n// ===== KERNEL CODE START =====\n__global__ void k(float* x){ int i = threadIdx.x; float z = x[i]; z = z + 1.0f; z = z * 1.01f; z = z + 2.0f; z = z * 1.02f; z = z + 3.0f; z = z * 1.03f; x[i] = z; }\n// ===== KERNEL CODE END =====\n\nint main() {\n    const int n = 1 << 20;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_a, *d_b, *d_out;\n    cudaMalloc(&d_a, bytes);\n    cudaMalloc(&d_b, bytes);\n    cudaMalloc(&d_out, bytes);\n    cudaMemset(d_a, 1, bytes);\n    cudaMemset(d_b, 1, bytes);\n\n    k<<<(n + 255) / 256, 256>>>(d_a);\n    cudaDeviceSynchronize();\n\n    float h_out = 0.0f;\n    cudaMemcpy(&h_out, d_out, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h_out);\n\n    cudaFree(d_a);\n    cudaFree(d_b);\n    cudaFree(d_out);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 0,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies latency-bound as the bottleneck and cites specific metrics (arithmetic intensity of ~0.75 FLOP/byte, 4 MB data footprint), but it primarily blames low arithmetic intensity and low DRAM utilization (the misleading memory-bound signal) rather than citing the key diagnostic evidence of Stall Long Scoreboard (43.93%) or sequential dependencies as the primary cause, failing Stage 3.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

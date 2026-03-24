@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbot_shared_00_000",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis is a very small, generic CUDA snippet using shared memory and thread indexing. It does not match a recognizable benchmark, tutorial example, or well-known codebase with confidence. It looks more like a minimal illustrative/test kernel than a canonical published example."
+}

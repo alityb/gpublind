@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_018",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/hand-crafted microbenchmark or test kernel. It has characteristics of something someone wrote to test memory access patterns or cache behavior (the `& 4095` masking to stay within a 4096-element buffer, the stride-17 and stride-257 access patterns with deliberate non-power-of-two strides to create varied cache line access patterns, and the small iterative computation loop). It doesn't match any well-known benchmark suite, tutorial, or public codebase that I'm aware of. It looks like an ad hoc kernel designed to probe memory subsystem behavior or to serve as a test case."
+}

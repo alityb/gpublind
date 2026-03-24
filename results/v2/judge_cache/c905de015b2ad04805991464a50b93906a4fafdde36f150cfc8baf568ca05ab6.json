@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" instead of \"occupancy-limited,\" missing that 51.86% achieved occupancy indicates a meaningful occupancy deficit (likely from small threadblock size collapsing blocks-per-SM), but it was appropriately self-assessed as LOW confidence, earning calibration credit.",
+  "judge_model": "claude-sonnet-4-6"
+}

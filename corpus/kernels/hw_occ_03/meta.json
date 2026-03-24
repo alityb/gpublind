@@ -1,0 +1,23 @@
+{
+  "id": "hw_occ_03",
+  "source": "handwritten",
+  "true_bottleneck": "occupancy-limited",
+  "misleading_signal": "hw_occ_03 appears compute-heavy, but large shared-memory or launch geometry collapses active warps",
+  "correct_explanation": "the kernel cannot keep enough warps resident to hide latency, so occupancy becomes the binding constraint",
+  "difficulty": "medium",
+  "category": "occupancy-limited",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "occupancy",
+      "shared memory",
+      "blocks per SM",
+      "active warps"
+    ],
+    "must_not_cite_as_primary": [
+      "memory bandwidth saturation",
+      "dependency chain",
+      "cache miss"
+    ]
+  }
+}

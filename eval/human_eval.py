@@ -3,81 +3,73 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Sequence
 
-from eval.prompts import render_prompt
-from eval.run_eval import parse_filter_args, parse_response, prompt_kwargs
-from registry import KernelRegistry, SEVERITY
+if __package__ in {None, ""}:
+    import sys
+
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from corpus import load_corpus
+from eval.conditions import render_condition
+from eval.run_eval import parse_response, result_path
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run a human GPUBlind evaluation session")
-    parser.add_argument("--evaluator-name", default="human")
-    parser.add_argument("--output", type=Path, default=Path("results/human"))
+    parser = argparse.ArgumentParser(description="GPUBlind v2 human evaluation")
+    parser.add_argument("--evaluator", required=True)
+    parser.add_argument("--condition", choices=["C0", "C2"], default="C0")
+    parser.add_argument("--kernels", type=Path, default=Path("corpus/kernels"))
+    parser.add_argument("--output", type=Path, default=Path("results/v2/human"))
+    parser.add_argument("--min-confidence", choices=["low", "medium", "high"], default="medium")
     parser.add_argument("--filter", action="append", default=[])
-    parser.add_argument("--min-confidence", choices=["high", "medium", "any"], default="medium")
-    parser.add_argument("--mined", type=Path, default=Path("data/mined_kernels.jsonl"))
-    parser.add_argument("--kernelbot", type=Path, default=Path("data/kernelbot_kernels.jsonl"))
-    parser.add_argument("--kernels", type=Path, default=Path("kernels"))
-    parser.add_argument("--profiles", type=Path, default=Path("profiles"))
     return parser.parse_args(argv)
 
 
-def result_path_for(output_dir: Path, evaluator_name: str, kernel_id: str) -> Path:
-    if evaluator_name == "human":
-        return output_dir / "level_1" / "label" / f"{kernel_id}.json"
-    return output_dir / evaluator_name / "level_1" / "label" / f"{kernel_id}.json"
+def parse_filters(raw_filters: list[str]) -> dict[str, str]:
+    parsed: dict[str, str] = {}
+    for raw in raw_filters:
+        if "=" in raw:
+            key, value = raw.split("=", 1)
+            parsed[key.strip()] = value.strip()
+    return parsed
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
-    registry = KernelRegistry(profile_dir=args.profiles, mock=True)
-    registry.load_mined(args.mined)
-    registry.load_kernelbot(args.kernelbot)
-    registry.load_handwritten(args.kernels)
-    filters = parse_filter_args(args.filter)
-    entries = registry.filter(
-        source=filters.get("source"),
-        category=filters.get("category"),
-        difficulty=filters.get("difficulty"),
-        true_bottleneck=filters.get("true_bottleneck"),
-        confidence=args.min_confidence,
-    )
+    condition = int(args.condition[1:])
+    entries = load_corpus(args.kernels, min_confidence=args.min_confidence)
+    filters = parse_filters(args.filter)
+    if "source" in filters:
+        entries = [entry for entry in entries if entry.source == filters["source"]]
     for entry in entries:
-        path = result_path_for(args.output, args.evaluator_name, entry.id)
-        if path.exists():
-            continue
-        rendered = render_prompt(1, "label", **prompt_kwargs(entry))
-        print(f"\n=== {entry.id} ===\n")
-        print(rendered["user"])
-        start = time.monotonic()
-        label_line = input("\nBOTTLENECK: ").strip()
+        prompt = render_condition(entry, condition)
+        print(f"=== {entry.id} ===")
+        print(prompt["user"])
+        start = time.time()
+        label = input("BOTTLENECK: ").strip()
+        confidence = input("CONFIDENCE: ").strip().upper()
         reasoning = input("REASONING: ").strip()
-        elapsed = time.monotonic() - start
-        raw_response = f"BOTTLENECK: {label_line}\nREASONING: {reasoning}"
-        predicted_label, parsed_reasoning = parse_response(raw_response)
+        elapsed = time.time() - start
+        raw_response = f"BOTTLENECK: {label}\nCONFIDENCE: {confidence}\nREASONING: {reasoning}"
+        predicted_label, parsed_confidence, parsed_reasoning = parse_response(raw_response)
         payload = {
             "kernel_id": entry.id,
-            "model": "human",
-            "trial": 1,
-            "level": 1,
-            "question_format": "label",
+            "model": args.evaluator,
+            "condition": args.condition,
+            "condition_name": condition,
             "true_bottleneck": entry.true_bottleneck,
             "predicted_label": predicted_label,
+            "confidence": parsed_confidence,
+            "reasoning": parsed_reasoning,
             "correct": predicted_label == entry.true_bottleneck,
-            "severity": SEVERITY.get((entry.true_bottleneck, predicted_label), 0),
-            "fell_for_adversarial": None,
+            "time_taken_seconds": round(elapsed, 3),
             "raw_response": raw_response,
-            "parsed_reasoning": parsed_reasoning,
-            "prompt_rendered": rendered,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "evaluator_name": args.evaluator_name,
-            "response_time_sec": round(elapsed, 3),
         }
+        path = result_path(args.output, args.evaluator.replace(" ", "_"), condition, entry.id)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return 0
 
 

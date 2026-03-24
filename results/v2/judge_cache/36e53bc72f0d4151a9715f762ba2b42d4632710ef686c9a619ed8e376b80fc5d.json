@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" rather than \"memory-bound\" (the true bottleneck), and compounded the error with HIGH confidence, making it an overconfident incorrect diagnosis; while the latency/scoreboard stall reasoning is plausible, the distinction between latency-bound and memory-bound was not correctly made per the ground truth label.",
+  "judge_model": "claude-sonnet-4-6"
+}

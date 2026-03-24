@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the occupancy-limited bottleneck, cites specific evidence (39.85% achieved occupancy implicitly via \"tiny per-thread workload\" and \"poor latency hiding,\" plus the concrete 128/256 thread mismatch pattern), avoids blaming global memory or bandwidth as primary causes, and the HIGH confidence is warranted given the correct diagnosis.",
+  "judge_model": "claude-sonnet-4-6"
+}

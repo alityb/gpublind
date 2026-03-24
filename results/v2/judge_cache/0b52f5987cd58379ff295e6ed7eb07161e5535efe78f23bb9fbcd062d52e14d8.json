@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies a latency-bound bottleneck, provides specific metric values as evidence, and does not primarily blame misleading signals, demonstrating high confidence in a correct diagnosis.",
+  "judge_model": "openai/gpt-4o-mini"
+}

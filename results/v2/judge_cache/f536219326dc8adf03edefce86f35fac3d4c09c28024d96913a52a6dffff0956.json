@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies memory-bound behavior with HIGH confidence, cites specific metric values (0.00 FLOP/byte AI, 61.3% DRAM BW utilization, 36.2% long scoreboard stalls), correctly attributes the root cause to DRAM bandwidth saturation rather than the misleading hw_mem_12 mixed access pattern signal, and appropriately contextualizes the scoreboard stalls as a symptom of bandwidth saturation rather than a primary cause.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

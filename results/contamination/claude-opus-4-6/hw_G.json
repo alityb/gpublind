@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_G",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a custom-crafted microbenchmark designed to stress-test GPU occupancy, shared memory usage, and arithmetic throughput. Several characteristics suggest it's hand-written and not from a standard benchmark or tutorial:\n\n1. The use of inline PTX assembly (`counted_mul`, `counted_add`) with `asm volatile` to prevent compiler optimization/elimination of arithmetic \u2014 this is a technique used in custom throughput benchmarks to ensure FLOP counting accuracy.\n2. The specific constants (24576 shared floats = 96KB, 96 outer iterations \u00d7 64 repeat iterations, 8 counted FP ops per inner iteration) look carefully chosen to produce a known FLOP count and to maximize shared memory allocation (pushing toward the 96KB or 100KB limits on modern architectures).\n3. The pseudo-random access patterns using prime-like strides (97, 29, 257, 1023, 13, 17) are typical of hand-crafted benchmarks designed to avoid trivial caching patterns.\n4. The overall structure \u2014 large shared memory allocation to limit occupancy, heavy arithmetic in the inner loop, mixed global/shared memory reads \u2014 resembles a roofline-model or occupancy-experiment kernel, but doesn't match any well-known public benchmark suite (e.g., not from SHOC, Rodinia, CUTLASS, or NVIDIA samples)."
+}

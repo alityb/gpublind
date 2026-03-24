@@ -1,0 +1,29 @@
+#include <cuda_runtime.h>
+#include <cstdio>
+
+// ===== KERNEL CODE START =====
+__global__ void k(float* x, float* y){ int i = blockIdx.x * blockDim.x + threadIdx.x; x[i] = y[i * 97] + 1.0f; }
+// ===== KERNEL CODE END =====
+
+int main() {
+    const int n = 1 << 20;
+    const size_t bytes = static_cast<size_t>(n) * sizeof(float);
+    float *d_a, *d_b, *d_out;
+    cudaMalloc(&d_a, bytes);
+    cudaMalloc(&d_b, bytes);
+    cudaMalloc(&d_out, bytes);
+    cudaMemset(d_a, 1, bytes);
+    cudaMemset(d_b, 1, bytes);
+
+    k<<<(n + 255) / 256, 256>>>(d_a, d_b);
+    cudaDeviceSynchronize();
+
+    float h_out = 0.0f;
+    cudaMemcpy(&h_out, d_out, sizeof(float), cudaMemcpyDeviceToHost);
+    printf("%f\n", h_out);
+
+    cudaFree(d_a);
+    cudaFree(d_b);
+    cudaFree(d_out);
+    return 0;
+}

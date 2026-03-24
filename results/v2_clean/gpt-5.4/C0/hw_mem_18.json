@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_18",
+  "model": "gpt-5.4",
+  "condition": "C0",
+  "condition_name": "code_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "Each output performs only 64 multiply-adds on a tiny, repeatedly reused working set: about 512 B from `a` + 256 B from `b` + 4 B store for roughly 128 FLOPs, so arithmetic intensity is only about 0.17 FLOP/byte, far below the 62 FLOP/byte ridge point. However, this access pattern has extreme inter-thread redundancy (`a[base+j]` is identical for all 64 threads in a group, and every thread rereads the same 64-element `b` vector), so much of the traffic should be served by cache rather than DRAM; on A10G this implies low DRAM utilization with stalls dominated by waiting on load completion/scoreboarding rather than saturating bandwidth.",
+  "correct": false,
+  "raw_response": "BOTTLENECK: latency-bound\n\nCONFIDENCE: HIGH\n\nREASONING: Each output performs only 64 multiply-adds on a tiny, repeatedly reused working set: about 512 B from `a` + 256 B from `b` + 4 B store for roughly 128 FLOPs, so arithmetic intensity is only about 0.17 FLOP/byte, far below the 62 FLOP/byte ridge point. However, this access pattern has extreme inter-thread redundancy (`a[base+j]` is identical for all 64 threads in a group, and every thread rereads the same 64-element `b` vector), so much of the traffic should be served by cache rather than DRAM; on A10G this implies low DRAM utilization with stalls dominated by waiting on load completion/scoreboarding rather than saturating bandwidth.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel\nrunning on an NVIDIA A10G GPU (ridge point: 62 FLOP/byte).\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void batched_mxv_kernel(const float* a, const float* b, float* out, int n) {\n\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    const int width = 64;\n    while (idx < n - width) {\n        float acc = 0.0f;\n        int base = (idx / width) * width;\n        #pragma unroll\n        for (int j = 0; j < width; ++j) {\n            acc += a[base + j] * b[j] * 0.015625f;\n        }\n        out[idx] = acc;\n        idx += stride;\n    }\n\n}\n\nint main() {\n    const int n = 1 << 26;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_a, *d_b, *d_c;\n    cudaMalloc(&d_a, bytes);\n    cudaMalloc(&d_b, bytes);\n    cudaMalloc(&d_c, bytes);\n    cudaMemset(d_a, 1, bytes);\n    cudaMemset(d_b, 2, bytes);\n    cudaMemset(d_c, 0, bytes);\n    batched_mxv_kernel<<<4096, 256>>>(d_a, d_b, d_c, n);\n    cudaDeviceSynchronize();\n    batched_mxv_kernel<<<4096, 256>>>(d_a, d_b, d_c, n);\n    cudaDeviceSynchronize();\n    float h = 0.0f;\n    cudaMemcpy(&h, d_c, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h);\n    cudaFree(d_a);\n    cudaFree(d_b);\n    cudaFree(d_c);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 0,
+    "stage_2_rvr": null,
+    "stage_3_mpr": null,
+    "confidence_calibrated": 1,
+    "explanation": "The response incorrectly identifies the bottleneck as latency-bound instead of the true memory-bound bottleneck, and therefore all subsequent metrics evaluation stages are not applicable.",
+    "judge_model": "openai/gpt-4o-mini"
+  }
+}

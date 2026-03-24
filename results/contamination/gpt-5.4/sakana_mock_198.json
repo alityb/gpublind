@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_198",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis looks like a synthetic CUDA microbenchmark or toy kernel: simple index math, masked accesses with `& 4095`, and a short arithmetic loop to create mixed memory/compute behavior. I don\u2019t recognize it as a standard kernel from a well-known benchmark suite, tutorial, or public codebase. Conservatively, I would say no."
+}

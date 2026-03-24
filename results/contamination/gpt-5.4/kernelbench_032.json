@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_032",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis looks like a placeholder/stub rather than a real CUDA kernel: it only has a minimal profiling harness template, a comment saying \u201cKernelBench candidate 32: 32_ConvolutionalVisionTransformer,\u201d and a TODO for generating tensors and calling a fused attention kernel. The \u201cKernelBench\u201d label suggests it may be derived from a generated or local benchmark harness, but I don\u2019t recognize this exact code as a known public benchmark, tutorial, or canonical codebase snippet."
+}

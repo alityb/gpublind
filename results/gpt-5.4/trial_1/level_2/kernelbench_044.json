@@ -1,0 +1,25 @@
+{
+  "kernel_id": "kernelbench_044",
+  "model": "gpt-5.4",
+  "trial": 1,
+  "level": 2,
+  "question_format": "label",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": "multiple large matrix-style operators dominate arithmetic work and likely exceed the roofline ridge point",
+  "predicted_label": "latency-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: There is no CUDA kernel being launched here\u2014only a host-side stub with `cudaDeviceSynchronize()` and a `printf`-style message\u2014so the profiling metrics are effectively all zeros and do not describe real GPU execution. With no active kernel work, there is no meaningful memory, compute, occupancy, or register pressure bottleneck to diagnose; the issue is simply that the workload is absent.",
+  "parsed_reasoning": "There is no CUDA kernel being launched here\u2014only a host-side stub with `cudaDeviceSynchronize()` and a `printf`-style message\u2014so the profiling metrics are effectively all zeros and do not describe real GPU execution. With no active kernel work, there is no meaningful memory, compute, occupancy, or register pressure bottleneck to diagnose; the issue is simply that the workload is absent.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 0.0%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.0%\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n// KernelBench candidate 44: 44_MiniGPTBlock\nint main() {\n  // Standalone profiling harness template generated from KernelBench PyTorch reference.\n  // TODO: materialize Q/K/V tensors and call a fused attention kernel.\n  cudaDeviceSynchronize();\n  std::puts(\"TODO: fill in generated harness before profiling.\");\n  return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T18:57:09.577482+00:00"
+}

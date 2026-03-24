@@ -1,0 +1,25 @@
+{
+  "kernel_id": "hw_C",
+  "model": "gpt-5.4",
+  "trial": 1,
+  "level": 2,
+  "question_format": "label",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": "sparse non-coalesced global loads through next_slot dominate execution despite the misleading barrier structure",
+  "predicted_label": "compute-bound",
+  "correct": false,
+  "severity": 2,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: compute-bound\nREASONING: Achieved occupancy is very high (92.86%), so the kernel is not primarily limited by occupancy, and DRAM bandwidth utilization is extremely low (0.33%) with perfect global load efficiency, which rules out a memory-bandwidth bottleneck. The kernel performs a large amount of explicit floating-point multiply/add work inside the nested loops relative to the amount of memory traffic, so the dominant limiter is arithmetic throughput.",
+  "parsed_reasoning": "Achieved occupancy is very high (92.86%), so the kernel is not primarily limited by occupancy, and DRAM bandwidth utilization is extremely low (0.33%) with perfect global load efficiency, which rules out a memory-bandwidth bottleneck. The kernel performs a large amount of explicit floating-point multiply/add work inside the nested loops relative to the amount of memory traffic, so the dominant limiter is arithmetic throughput.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 92.86%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.33%\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__device__ __forceinline__ float counted_mul(float a, float b) {\n    float out;\n    asm volatile(\"mul.rn.f32 %0, %1, %2;\" : \"=f\"(out) : \"f\"(a), \"f\"(b));\n    return out;\n}\n\n__device__ __forceinline__ float counted_add(float a, float b) {\n    float out;\n    asm volatile(\"add.rn.f32 %0, %1, %2;\" : \"=f\"(out) : \"f\"(a), \"f\"(b));\n    return out;\n}\n\n__global__ void suspicious_sync(const float* values, const int* next_slot, float* out, int n) {\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    if (tid >= n) {\n        return;\n    }\n\n    if (blockIdx.x & 1) {\n        // WARNING: sync inside branch\n        __syncthreads();\n    } else {\n        __syncthreads();\n    }\n\n    int mask = n - 1;\n    int lane = threadIdx.x & 31;\n    int cursor = (tid * 37 + lane * 97) & mask;\n    float acc = values[(cursor + lane * 13) & mask];\n    float scale0 = 0.25f + 0.03125f * static_cast<float>(lane & 7);\n    float scale1 = 0.75f - 0.015625f * static_cast<float>(lane & 15);\n\n    #pragma unroll 1\n    for (int step = 0; step < 16; ++step) {\n        cursor = next_slot[(cursor + step * 119 + lane * 17) & mask];\n        float sample0 = values[cursor];\n        float sample1 = values[(cursor + 257) & mask];\n\n        #pragma unroll\n        for (int mix = 0; mix < 8; ++mix) {\n            float coeff0 = scale0 + 0.0078125f * static_cast<float>(mix + 1);\n            float coeff1 = scale1 - 0.00390625f * static_cast<float>((mix + step) & 7);\n            float t0 = counted_mul(sample0, coeff0);\n            float t1 = counted_mul(sample1, coeff1);\n            acc = counted_add(acc, t0);\n            acc = counted_add(acc, t1);\n        }\n\n        scale0 = counted_add(counted_mul(scale0, 1.0009765625f), 0.00390625f);\n        scale1 = counted_add(counted_mul(scale1, 0.9990234375f), 0.001953125f);\n    }\n\n    out[tid] = acc;\n}\n\nint main() {\n    const int n = 1 << 20;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    const size_t index_bytes = static_cast<size_t>(n) * sizeof(int);\n    float* h = new float[n];\n    int* idx = new int[n];\n    float *values, *out;\n    int* next_slot;\n    cudaMalloc(&values, bytes);\n    cudaMalloc(&out, bytes);\n    cudaMalloc(&next_slot, index_bytes);\n    for (int i = 0; i < n; ++i) {\n        h[i] = static_cast<float>((i * 7) % 193) * 0.02f;\n        idx[i] = (i * 131 + 17) & (n - 1);\n    }\n    cudaMemcpy(values, h, bytes, cudaMemcpyHostToDevice);\n    cudaMemcpy(next_slot, idx, index_bytes, cudaMemcpyHostToDevice);\n    suspicious_sync<<<(n + 255) / 256, 256>>>(values, next_slot, out, n);\n    cudaMemcpy(h, out, bytes, cudaMemcpyDeviceToHost);\n    std::printf(\"%f\\n\", h[2]);\n    cudaFree(values);\n    cudaFree(out);\n    cudaFree(next_slot);\n    delete[] h;\n    delete[] idx;\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T18:54:51.250393+00:00"
+}

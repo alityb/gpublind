@@ -1,0 +1,20 @@
+{
+  "id": "kernelbot_shared_03_019",
+  "source": "kernelbot",
+  "true_bottleneck": "occupancy-limited",
+  "misleading_signal": "shared memory usage looks optimized but small threadblock may collapse occupancy",
+  "correct_explanation": "shared memory usage looks optimized but small threadblock may collapse occupancy",
+  "difficulty": "hard",
+  "category": "occupancy-limited",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "occupancy",
+      "blocks per SM"
+    ],
+    "must_not_cite_as_primary": [
+      "global memory",
+      "bandwidth"
+    ]
+  },
+  "hardware": "A10G"
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"memory-bound\" (the true bottleneck is latency-bound) and did so with HIGH confidence while completely ignoring the critical 84.5% Stall Long Scoreboard metric that reveals latency stalls as the root cause, making it both wrong and overconfident.",
+  "judge_model": "claude-sonnet-4-6"
+}

@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_044",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\n\nSOURCE: UNKNOWN\n\nThis is just a minimal CUDA harness stub with a comment saying `KernelBench candidate 44: 44_MiniGPTBlock` and a TODO. It does not contain an actual kernel implementation, only boilerplate (`cudaDeviceSynchronize`, `puts`). The `KernelBench` naming suggests it may have been generated for a benchmark suite or internal dataset related to model blocks, but from this snippet alone I can\u2019t confidently tie it to a specific known public benchmark, tutorial, or codebase."
+}

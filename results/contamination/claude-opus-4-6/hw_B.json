@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_B",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel applies a sequence of arbitrary arithmetic transformations (centering, energy computation, scaling, normalization, correction, damping, fusion, refinement) with specific magic constants (0.125f, 0.03125f, 1.125f, 0.0625f, 1.03125f, 0.015625f, etc.) that don't correspond to any well-known signal processing, neural network activation, or mathematical function I can identify. The chain of operations appears to be synthetically constructed rather than derived from a known algorithm, benchmark, or tutorial. The boilerplate (grid-stride pattern, main with cudaMalloc/cudaMemcpy) is standard, but the specific kernel logic looks custom-made."
+}

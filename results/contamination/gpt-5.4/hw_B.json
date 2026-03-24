@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_B",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis looks like a generic elementwise CUDA example rather than a recognizable benchmark or tutorial kernel. The math sequence and constants appear arbitrary/synthetic, and the surrounding host code is standard boilerplate for launching a simple 1D transform. I don\u2019t recognize it as matching a known public benchmark, SDK sample, or common codebase."
+}

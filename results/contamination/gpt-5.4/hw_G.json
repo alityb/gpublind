@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_G",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis does not look like a recognizable standard CUDA sample, tutorial, or common benchmark kernel. It appears synthetic: heavy use of inline PTX `mul/add` to count FLOPs, large dynamic shared memory allocation to manipulate occupancy, power-of-two masking, and repeated arithmetic loops suggest a custom stress/occupancy microbenchmark rather than a known public benchmark codebase. The name `occupancy_reference` also feels generic rather than tied to a specific library or suite."
+}

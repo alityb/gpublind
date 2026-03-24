@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_08",
+  "model": "gpt-5.4",
+  "condition": "C1",
+  "condition_name": "metrics_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "Arithmetic intensity is extremely low at 0.03 FLOP/byte, but this is not memory-bandwidth-limited because the working set is fully cached: L2 hit rate is 100.0%, global load efficiency is 100.0%, and the reported DRAM utilization is not a credible sign of true DRAM saturation here. The dominant symptom is Stall \u2014 Long Scoreboard at 34.7% with 0.0% Memory Dependency stalls, indicating the kernel is waiting on dependent memory operations/latencies rather than bandwidth; occupancy at 49.4% is not low enough to classify it as occupancy-limited.",
+  "correct": false,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: Arithmetic intensity is extremely low at 0.03 FLOP/byte, but this is not memory-bandwidth-limited because the working set is fully cached: L2 hit rate is 100.0%, global load efficiency is 100.0%, and the reported DRAM utilization is not a credible sign of true DRAM saturation here. The dominant symptom is Stall \u2014 Long Scoreboard at 34.7% with 0.0% Memory Dependency stalls, indicating the kernel is waiting on dependent memory operations/latencies rather than bandwidth; occupancy at 49.4% is not low enough to classify it as occupancy-limited.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the bottleneck of a CUDA kernel on NVIDIA A10G given\nthese hardware performance counters. You will NOT see the source.\n\nArithmetic Intensity: 0.03 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 49.4%\nDRAM Bandwidth Utilization: 274.8% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 34.7% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 31\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 0,
+    "stage_2_rvr": null,
+    "stage_3_mpr": null,
+    "confidence_calibrated": 1,
+    "explanation": "The LLM incorrectly identifies the bottleneck as latency-bound instead of the true memory-bound issue indicated by the low arithmetic intensity and high DRAM bandwidth utilization, thus displaying overconfidence in its error.",
+    "judge_model": "openai/gpt-4o-mini"
+  }
+}

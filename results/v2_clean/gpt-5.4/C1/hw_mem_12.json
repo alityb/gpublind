@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_12",
+  "model": "gpt-5.4",
+  "condition": "C1",
+  "condition_name": "metrics_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "Arithmetic intensity is 0.00 FLOP/byte, far below the 62 FLOP/byte ridge point, so the kernel has essentially no compute work relative to data movement. DRAM bandwidth utilization is 61.3% of peak, which is high enough to indicate bandwidth pressure, while occupancy is already high at 95.6% and registers/thread are low at 20, ruling out occupancy or register-spill limits.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: Arithmetic intensity is 0.00 FLOP/byte, far below the 62 FLOP/byte ridge point, so the kernel has essentially no compute work relative to data movement. DRAM bandwidth utilization is 61.3% of peak, which is high enough to indicate bandwidth pressure, while occupancy is already high at 95.6% and registers/thread are low at 20, ruling out occupancy or register-spill limits.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the bottleneck of a CUDA kernel on NVIDIA A10G given\nthese hardware performance counters. You will NOT see the source.\n\nArithmetic Intensity: 0.00 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 95.6%\nDRAM Bandwidth Utilization: 61.3% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 36.2% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 20\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The diagnosis correctly identifies the bottleneck as memory-bound, substantiates this with specific metrics, and does not primarily blame the misleading signal.",
+    "judge_model": "openai/gpt-4o-mini"
+  }
+}

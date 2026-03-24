@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_054",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/contrived microbenchmark rather than something from a well-known codebase or tutorial. The specific characteristics \u2014 the magic constants (17, 4095, 257, 8 iterations, 1.1f multiplier), the bitwise AND masking for circular buffer-style access, and the particular access pattern \u2014 don't match any standard benchmark suite (Rodinia, Parboil, SHOC, etc.) or well-known CUDA tutorial that I'm aware of. It looks like a hand-crafted test kernel, possibly designed to study memory access patterns, cache behavior, or instruction-level parallelism."
+}

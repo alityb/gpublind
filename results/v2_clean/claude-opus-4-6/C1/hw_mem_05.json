@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_05",
+  "model": "claude-opus-4-6",
+  "condition": "C1",
+  "condition_name": "metrics_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "The arithmetic intensity is essentially zero (0.00 FLOP/byte), placing it far below the ridge point, yet DRAM bandwidth utilization is only 45.2%\u2014well below the >50% threshold that would indicate a true memory-bound scenario. The dominant stall reason is Long Scoreboard at 66.7% of active cycles, which indicates warps are waiting on outstanding memory requests (likely L2/global loads) to complete before dependent instructions can execute. Despite high occupancy (92.5%) and perfect L2 hit rate (100%), the kernel cannot saturate the memory subsystem because execution is serialized on data dependencies, characteristic of a latency-bound workload.",
+  "correct": false,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: The arithmetic intensity is essentially zero (0.00 FLOP/byte), placing it far below the ridge point, yet DRAM bandwidth utilization is only 45.2%\u2014well below the >50% threshold that would indicate a true memory-bound scenario. The dominant stall reason is Long Scoreboard at 66.7% of active cycles, which indicates warps are waiting on outstanding memory requests (likely L2/global loads) to complete before dependent instructions can execute. Despite high occupancy (92.5%) and perfect L2 hit rate (100%), the kernel cannot saturate the memory subsystem because execution is serialized on data dependencies, characteristic of a latency-bound workload.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the bottleneck of a CUDA kernel on NVIDIA A10G given\nthese hardware performance counters. You will NOT see the source.\n\nArithmetic Intensity: 0.00 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 92.5%\nDRAM Bandwidth Utilization: 45.2% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 66.7% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 22\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 0,
+    "stage_2_rvr": null,
+    "stage_3_mpr": null,
+    "confidence_calibrated": 0,
+    "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" (when the true bottleneck is memory-bound) with HIGH confidence, and compounded the error by citing Long Scoreboard stalls as the primary cause\u2014exactly the misleading signal the diagnostic was designed to avoid\u2014while dismissing the DRAM bandwidth evidence with an arbitrary \">50% threshold\" rationalization.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "kernel_id": "sakana_mock_138",
+  "model": "gpt-5.4",
+  "trial": 1,
+  "level": 2,
+  "question_format": "label",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": null,
+  "predicted_label": "memory-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: memory-bound\nREASONING: DRAM bandwidth utilization is high at 81%, while global load efficiency is very low at 34%, indicating inefficient global memory accesses are driving the cost. The kernel does only modest arithmetic per multiple global loads, so despite 66% occupancy, performance is primarily limited by memory throughput rather than compute or latency.",
+  "parsed_reasoning": "DRAM bandwidth utilization is high at 81%, while global load efficiency is very low at 34%, indicating inefficient global memory accesses are driving the cost. The kernel does only modest arithmetic per multiple global loads, so despite 66% occupancy, performance is primarily limited by memory throughput rather than compute or latency.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 66.0%\n- Global load efficiency: 34.0%\n- DRAM bandwidth utilization: 81.0%\n\n```cuda\n__global__ void kernel(float* x, const float* y) { int i = blockIdx.x * blockDim.x + threadIdx.x; float v = y[(i * 17) & 4095]; for (int j = 0; j < 8; ++j) { v = v * 1.1f + x[(i + j * 257) & 4095]; } x[i] = v; }\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T19:01:06.970825+00:00"
+}

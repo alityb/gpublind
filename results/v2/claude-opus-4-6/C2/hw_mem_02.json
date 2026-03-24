@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_02",
+  "model": "claude-opus-4-6",
+  "condition": "C2",
+  "condition_name": "code_plus_metrics",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "The arithmetic intensity is 0.12 FLOP/byte, far below the ridge point of 62 FLOP/byte, confirming the kernel is on the memory-bound side of the roofline. DRAM bandwidth utilization is 60.5% of peak, which is substantial and indicates memory bandwidth is the active limiting resource. While long scoreboard stalls are 56.5%, this is expected and consistent with memory-bound behavior \u2014 warps are stalling waiting for global memory loads to return, and the high DRAM utilization (>50%) distinguishes this as true memory-boundedness rather than latency-boundedness. The kernel performs only one addition per three memory accesses (two loads, one store), making it fundamentally bandwidth-limited.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: The arithmetic intensity is 0.12 FLOP/byte, far below the ridge point of 62 FLOP/byte, confirming the kernel is on the memory-bound side of the roofline. DRAM bandwidth utilization is 60.5% of peak, which is substantial and indicates memory bandwidth is the active limiting resource. While long scoreboard stalls are 56.5%, this is expected and consistent with memory-bound behavior \u2014 warps are stalling waiting for global memory loads to return, and the high DRAM utilization (>50%) distinguishes this as true memory-boundedness rather than latency-boundedness. The kernel performs only one addition per three memory accesses (two loads, one store), making it fundamentally bandwidth-limited.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel.\n\nHardware performance counters (NVIDIA A10G):\nArithmetic Intensity: 0.12 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 93.2%\nDRAM Bandwidth Utilization: 60.5% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 56.5% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 28\n\nSource code:\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void vadd_kernel(const float* __restrict__ a, const float* __restrict__ b, float* __restrict__ out, int n) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    while (idx < n) {\n        out[idx] = a[idx] + b[idx];\n        idx += stride;\n    }\n}\n\nint main() {\n    const int n = 1 << 26;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_a, *d_b, *d_out;\n    cudaMalloc(&d_a, bytes);\n    cudaMalloc(&d_b, bytes);\n    cudaMalloc(&d_out, bytes);\n    cudaMemset(d_a, 1, bytes);\n    cudaMemset(d_b, 2, bytes);\n    vadd_kernel<<<4096, 256>>>(d_a, d_b, d_out, n);\n    cudaDeviceSynchronize();\n    vadd_kernel<<<4096, 256>>>(d_a, d_b, d_out, n);\n    cudaDeviceSynchronize();\n    float h_out = 0.0f;\n    cudaMemcpy(&h_out, d_out, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h_out);\n    cudaFree(d_a);\n    cudaFree(d_b);\n    cudaFree(d_out);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies memory-bound as the bottleneck, cites specific metric values (0.12 FLOP/byte AI, 60.5% DRAM BW utilization, 56.5% long scoreboard stalls), correctly frames the long scoreboard stalls as a symptom of memory-boundedness rather than the primary cause, and appropriately expresses HIGH confidence given the correct diagnosis.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

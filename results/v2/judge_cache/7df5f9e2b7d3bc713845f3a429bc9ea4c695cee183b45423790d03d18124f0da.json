@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 0,
+  "confidence_calibrated": 0,
+  "explanation": "The bottleneck label is correct and specific evidence is cited (dependency chain, scoreboard stalls), but the response fails STAGE_3 because it misidentifies the cause as \"perfectly coalesced\" memory with low bandwidth pressure rather than citing the actual misleading signal (poor coalescing) and correctly attributing stalls to latency; additionally, the stated arithmetic intensity of 1.5 FLOP/byte contradicts the raw metric of 0.0 FLOP/byte, making the HIGH confidence claim poorly calibrated given these factual inconsistencies.",
+  "judge_model": "claude-sonnet-4-6"
+}

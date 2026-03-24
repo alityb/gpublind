@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_042",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/toy benchmark kernel, likely hand-crafted to test specific memory access patterns. The use of arbitrary constants (17, 4095, 257, 8 iterations, 1.1f multiplier) and the bitwise-AND masking for address wrapping suggest it was written to stress-test cache behavior or demonstrate strided/irregular memory access patterns. It doesn't match any well-known benchmark suite, tutorial, or public codebase that I'm aware of."
+}

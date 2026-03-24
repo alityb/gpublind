@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_07",
+  "model": "gpt-5.4",
+  "condition": "C0",
+  "condition_name": "code_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "Each iteration does 1 FP64 multiply while moving 8 bytes of input and 8 bytes of output, so the arithmetic intensity is about 1/16 = 0.0625 FLOP/byte, far below the A10G ridge point of 62 FLOP/byte. The access pattern is perfectly coalesced and there is no meaningful dependency chain, spill risk, or low-occupancy issue with 256-thread blocks and a very large grid, so throughput will be limited by DRAM bandwidth rather than compute.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: Each iteration does 1 FP64 multiply while moving 8 bytes of input and 8 bytes of output, so the arithmetic intensity is about 1/16 = 0.0625 FLOP/byte, far below the A10G ridge point of 62 FLOP/byte. The access pattern is perfectly coalesced and there is no meaningful dependency chain, spill risk, or low-occupancy issue with 256-thread blocks and a very large grid, so throughput will be limited by DRAM bandwidth rather than compute.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel\nrunning on an NVIDIA A10G GPU (ridge point: 62 FLOP/byte).\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void scale_kernel(const double* __restrict__ in, double* __restrict__ out, double scale, int n) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    while (idx < n) {\n        out[idx] = in[idx] * scale;\n        idx += stride;\n    }\n}\n\nint main() {\n    const int n = 1 << 26;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(double);\n    double *d_in, *d_out;\n    cudaMalloc(&d_in, bytes);\n    cudaMalloc(&d_out, bytes);\n    cudaMemset(d_in, 1, bytes);\n    scale_kernel<<<4096, 256>>>(d_in, d_out, 2.0, n);\n    cudaDeviceSynchronize();\n    scale_kernel<<<4096, 256>>>(d_in, d_out, 2.0, n);\n    cudaDeviceSynchronize();\n    double h_out = 0.0;\n    cudaMemcpy(&h_out, d_out, sizeof(double), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h_out);\n    cudaFree(d_in);\n    cudaFree(d_out);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies the bottleneck as memory-bound, provides specific metric values to support the reasoning, and does not blame the misleading signal as the primary cause of the issue.",
+    "judge_model": "openai/gpt-4o-mini"
+  }
+}

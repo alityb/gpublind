@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the bottleneck as latency-bound and supports its reasoning with specific metrics related to scoreboard stalls while not relying on misleading signals.",
+  "judge_model": "openai/gpt-4o-mini"
+}

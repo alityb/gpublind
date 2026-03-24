@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_050",
+  "model": "gpt-5.4",
+  "seen_before": true,
+  "source_guess": "KernelBench (likely an auto-generated or placeholder profiling harness for candidate 50, \"50_ReLUSelfAttention\")",
+  "raw_response": "SEEN_BEFORE: YES\n\nSOURCE: KernelBench (likely an auto-generated or placeholder profiling harness for candidate 50, \"50_ReLUSelfAttention\")\n\nThis looks directly like a KernelBench-generated standalone harness stub rather than a real CUDA kernel implementation. The comment `KernelBench candidate 50: 50_ReLUSelfAttention` and the template text about a \"Standalone profiling harness generated from KernelBench PyTorch reference\" strongly suggest it comes from that benchmark/codegen setup, not a tutorial or handwritten public example."
+}

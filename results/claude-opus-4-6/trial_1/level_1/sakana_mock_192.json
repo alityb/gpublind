@@ -1,0 +1,32 @@
+{
+  "kernel_id": "sakana_mock_192",
+  "model": "claude-opus-4-6",
+  "trial": 1,
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": null,
+  "predicted_label": "memory-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: memory-bound\nREASONING: The memory access patterns `y[(i * 17) & 4095]` and `x[(i + j * 257) & 4095]` use non-sequential index computations that destroy coalescing\u2014adjacent threads access addresses strided by 17 and 257 elements respectively, causing scattered memory transactions across cache lines. The compute in the loop is minimal (one FMA per iteration), so the kernel spends most of its time waiting on inefficient global memory accesses. The working set fits in 16KB (4096 floats), but the non-coalesced access pattern still generates far more memory transactions than necessary, making memory bandwidth the dominant bottleneck.",
+  "parsed_reasoning": "The memory access patterns `y[(i * 17) & 4095]` and `x[(i + j * 257) & 4095]` use non-sequential index computations that destroy coalescing\u2014adjacent threads access addresses strided by 17 and 257 elements respectively, causing scattered memory transactions across cache lines. The compute in the loop is minimal (one FMA per iteration), so the kernel spends most of its time waiting on inefficient global memory accesses. The working set fits in 16KB (4096 floats), but the non-coalesced access pattern still generates far more memory transactions than necessary, making memory bandwidth the dominant bottleneck.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n__global__ void kernel(float* x, const float* y) { int i = blockIdx.x * blockDim.x + threadIdx.x; float v = y[(i * 17) & 4095]; for (int j = 0; j < 8; ++j) { v = v * 1.1f + x[(i + j * 257) & 4095]; } x[i] = v; }\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T19:27:13.971002+00:00",
+  "judge": {
+    "label_correct": 1,
+    "reasoning_grounded": 1,
+    "mislead_resistant": 1,
+    "explanation": "The model correctly identified memory-bound as the bottleneck, cited specific code patterns (stride-17 and stride-257 access patterns) as evidence of non-coalesced memory access, and correctly noted that the minimal compute per iteration means memory latency dominates despite the apparent arithmetic in the loop.",
+    "judge_model": "claude-sonnet-4-6"
+  }
+}

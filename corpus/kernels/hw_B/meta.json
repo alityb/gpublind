@@ -1,0 +1,20 @@
+{
+  "id": "hw_B",
+  "source": "handwritten",
+  "true_bottleneck": "latency-bound",
+  "misleading_signal": "the kernel performs a clean streaming load/store pattern, so it looks like a bandwidth-limited map over contiguous memory",
+  "correct_explanation": "arithmetic dependency chains create long scoreboard stalls that prevent warp hiding",
+  "difficulty": "hard",
+  "category": "latency-bound",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "long dependent chain",
+      "stall_long_sb_pct"
+    ],
+    "must_not_cite_as_primary": [
+      "perfect coalescing",
+      "sequential memory access"
+    ]
+  },
+  "hardware": "A10G"
+}

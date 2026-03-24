@@ -1,16 +1,19 @@
 from __future__ import annotations
 
-import json
+import argparse
 import random
-import re
-from collections import Counter, defaultdict
+from dataclasses import dataclass
 from pathlib import Path
-from statistics import mean, pstdev
-from typing import Any, Iterable
+from typing import Sequence
 
-from registry.kernel_entry import KernelEntry
+if __package__ in {None, ""}:
+    import sys
 
-LABELS = [
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from corpus import CorpusEntry, load_corpus
+
+VALID_LABELS = [
     "memory-bound",
     "compute-bound",
     "latency-bound",
@@ -19,67 +22,83 @@ LABELS = [
 ]
 
 
-def load_roof(path: Path = Path("profiles/hardware_roof.json")) -> dict[str, Any]:
-    return json.loads(path.read_text(encoding="utf-8"))
+@dataclass
+class RandomBaseline:
+    name: str = "Random"
+    seed: int = 7
+
+    def predict(self, entry: CorpusEntry) -> str:
+        return random.Random(f"{self.seed}:{entry.id}").choice(VALID_LABELS)
 
 
-def ridge_point_for_entry(entry: KernelEntry, roof: dict[str, Any]) -> float:
-    if "ridge_point" in entry.ncu_profile.raw:
-        return float(entry.ncu_profile.raw["ridge_point"])
-    return float(roof["peak_flops_tflops"]) / float(roof["peak_bw_tbps"])
+@dataclass
+class FrequencyBaseline:
+    name: str = "Frequency (always memory-bound)"
+
+    def predict(self, entry: CorpusEntry) -> str:
+        return "memory-bound"
 
 
-def estimate_flops_and_bytes(code: str) -> tuple[float, float]:
-    flops = sum(len(re.findall(pattern, code)) for pattern in [r"\+", r"-", r"\*", r"/"])
-    global_refs = len(re.findall(r"\[[^\]]+\]", code))
-    bytes_moved = max(global_refs * 4.0, 1.0)
-    return float(flops), float(bytes_moved)
+@dataclass
+class RooflineBaseline:
+    name: str = "Roofline (AI vs ridge)"
+
+    def predict(self, entry: CorpusEntry) -> str:
+        ai = float(entry.profile["arithmetic_intensity_flop_per_byte"])
+        ridge = float(entry.profile["hardware"]["ridge_point_flop_per_byte"])
+        return "compute-bound" if ai > ridge else "memory-bound"
 
 
-def random_baseline(entries: Iterable[KernelEntry], trials: int = 1000, seed: int = 7) -> dict[str, float]:
-    entry_list = list(entries)
-    rng = random.Random(seed)
-    accuracies: list[float] = []
-    for _ in range(trials):
-        correct = sum(1 for entry in entry_list if rng.choice(LABELS) == entry.true_bottleneck)
-        accuracies.append(correct / max(len(entry_list), 1))
-    return {"mean": mean(accuracies), "std": pstdev(accuracies)}
+@dataclass
+class RuleBasedExpertBaseline:
+    name: str = "Rule-Based Expert"
+
+    def predict(self, entry: CorpusEntry) -> str:
+        p = entry.profile
+        regs = int(p["register_count_per_thread"])
+        occ = float(p["achieved_occupancy_pct"])
+        stall_long = float(p["stall_long_scoreboard_pct"])
+        dram = float(p["dram_bw_utilization_pct"])
+        ai = float(p["arithmetic_intensity_flop_per_byte"])
+        ridge = float(p["hardware"]["ridge_point_flop_per_byte"])
+
+        if regs >= 200 and dram < 20.0:
+            return "register-spill"
+        if occ < 35.0:
+            return "occupancy-limited"
+        if stall_long > 30.0 and dram < 10.0:
+            return "latency-bound"
+        if ai < ridge:
+            if dram > 40.0:
+                return "memory-bound"
+            return "latency-bound"
+        return "compute-bound"
 
 
-def frequency_baseline(entries: Iterable[KernelEntry]) -> dict[str, object]:
-    entry_list = list(entries)
-    counts = Counter(entry.true_bottleneck for entry in entry_list)
-    if not counts:
-        return {"label": None, "accuracy": 0.0, "per_category_accuracy": {}}
-    label = counts.most_common(1)[0][0]
-    per_category: dict[str, float] = {}
-    by_category: dict[str, list[KernelEntry]] = defaultdict(list)
-    for entry in entry_list:
-        by_category[entry.category].append(entry)
-    for category, category_entries in by_category.items():
-        per_category[category] = sum(1 for entry in category_entries if entry.true_bottleneck == label) / len(category_entries)
-    accuracy = sum(1 for entry in entry_list if entry.true_bottleneck == label) / len(entry_list)
-    return {"label": label, "accuracy": accuracy, "per_category_accuracy": per_category}
+BASELINES = [
+    RandomBaseline(),
+    FrequencyBaseline(),
+    RooflineBaseline(),
+    RuleBasedExpertBaseline(),
+]
 
 
-def roofline_prediction(entry: KernelEntry, roof: dict[str, Any]) -> str:
-    flops, bytes_moved = estimate_flops_and_bytes(entry.code)
-    arithmetic_intensity = flops / bytes_moved
-    ridge_point = ridge_point_for_entry(entry, roof)
-    if entry.true_bottleneck in {"latency-bound", "occupancy-limited", "register-spill"}:
-        return "unknown"
-    return "compute-bound" if arithmetic_intensity > ridge_point else "memory-bound"
+def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Print v2 baseline predictions")
+    parser.add_argument("--kernels", type=Path, default=Path("corpus/kernels"))
+    return parser.parse_args(argv)
 
 
-def roofline_baseline(entries: Iterable[KernelEntry], roof: dict[str, Any] | None = None) -> dict[str, object]:
-    entry_list = list(entries)
-    roof_data = roof or load_roof()
-    predictions: list[dict[str, object]] = []
-    correct = 0
-    for entry in entry_list:
-        predicted = roofline_prediction(entry, roof_data)
-        is_correct = predicted == entry.true_bottleneck
-        correct += int(is_correct)
-        predictions.append({"kernel_id": entry.id, "predicted_label": predicted, "correct": is_correct})
-    accuracy = correct / max(len(entry_list), 1)
-    return {"accuracy": accuracy, "predictions": predictions}
+def main(argv: Sequence[str] | None = None) -> int:
+    args = parse_args(argv)
+    entries = load_corpus(args.kernels, min_confidence="low")
+    for baseline in BASELINES:
+        print(f"=== {baseline.name} ===")
+        for entry in entries:
+            print(f"{entry.id}: {baseline.predict(entry)}")
+        print()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

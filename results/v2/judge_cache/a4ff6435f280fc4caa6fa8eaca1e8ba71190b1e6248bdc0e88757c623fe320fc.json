@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 0,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "While the bottleneck label is correct (latency-bound), the response fails Stage 2 because it never cites the actual profiling metrics (e.g., the 83.89% Stall Long Scoreboard value) as evidence, instead constructing a hypothetical arithmetic intensity argument, and it is overconfident (HIGH) despite reasoning from fabricated metrics rather than the provided data.",
+  "judge_model": "claude-sonnet-4-6"
+}

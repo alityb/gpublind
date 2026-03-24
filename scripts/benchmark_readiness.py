@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from collections import Counter
 from pathlib import Path
 from typing import Sequence
@@ -30,6 +31,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--kernels", type=Path, default=Path("kernels"))
     parser.add_argument("--profiles", type=Path, default=Path("profiles"))
     parser.add_argument("--min-confidence", choices=["high", "medium", "any"], default="medium")
+    parser.add_argument("--levels", default="1,2,3")
+    parser.add_argument("--subset", type=Path, default=None)
     return parser.parse_args(argv)
 
 
@@ -48,13 +51,31 @@ def status(ok: bool) -> str:
     return "PASS" if ok else "WARN"
 
 
+def parse_levels(raw_levels: str) -> set[int]:
+    return {int(level.strip()) for level in raw_levels.split(",") if level.strip()}
+
+
+def load_subset_ids(path: Path | None) -> set[str]:
+    if path is None:
+        return set()
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    items = payload.get("kernel_ids", []) if isinstance(payload, dict) else payload
+    return {str(item) for item in items}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     registry = build_registry(args)
     entries = registry.filter(confidence=args.min_confidence)
+    subset_ids = load_subset_ids(args.subset)
+    if subset_ids:
+        entries = [entry for entry in entries if entry.id in subset_ids]
     rows = latest_per_combo(load_results(args.results))
     label_rows = [row for row in rows if str(row.get("question_format", "label")) == "label"]
-    label_rows = [row for row in label_rows if str(row.get("kernel_id")) in {entry.id for entry in entries}]
+    selected_levels = parse_levels(args.levels)
+    label_rows = [row for row in label_rows if int(row.get("level", 1)) in selected_levels]
+    allowed_ids = {entry.id for entry in entries}
+    label_rows = [row for row in label_rows if str(row.get("kernel_id")) in allowed_ids]
     label_df = pd.DataFrame(label_rows)
 
     verified = [entry for entry in entries if entry.ncu_profile.raw.get("ground_truth_verified", True)]
@@ -88,6 +109,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     print("GPUBlind Benchmark Readiness")
     print()
+    print(f"Active levels: {sorted(selected_levels)}")
     print(f"Corpus size: {len(entries)} filtered kernels")
     print(f"Verified kernels: {len(verified)} [{status(enough_verified)}: target >= 50]")
     print(f"Class coverage: {dict(sorted(bottleneck_counts.items()))} [{status(not missing_labels)}]")

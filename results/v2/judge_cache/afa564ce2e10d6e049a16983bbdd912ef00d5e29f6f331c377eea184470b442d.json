@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The response misclassifies the bottleneck as latency-bound instead of occupancy-limited, leading to a score of 0 for Stage 1 and subsequently NULL for the other stages.",
+  "judge_model": "openai/gpt-4o-mini"
+}

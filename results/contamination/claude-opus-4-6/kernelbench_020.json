@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_020",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis is essentially a stub/placeholder file with no actual CUDA kernel implementation. It contains only a `main()` function that synchronizes the device and prints a TODO message. While the comment references \"KernelBench candidate 20: 20_MobileNetV2,\" suggesting it was generated as part of the KernelBench benchmark suite, the actual kernel code is not present \u2014 it's an empty harness template. There is no meaningful GPU kernel here to have seen before."
+}

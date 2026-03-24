@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies latency-bound as the bottleneck with high confidence, cites specific metric values (13.6% long scoreboard stalls, 0.11 FLOP/byte arithmetic intensity, 87.1% occupancy, 0.1% DRAM utilization) as evidence, and correctly treats the low arithmetic intensity as a misleading signal rather than the primary cause, instead prioritizing the long scoreboard stall pattern.",
+  "judge_model": "claude-sonnet-4-6"
+}

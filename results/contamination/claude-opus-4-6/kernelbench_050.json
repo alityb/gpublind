@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_050",
+  "model": "claude-opus-4-6",
+  "seen_before": true,
+  "source_guess": "KernelBench benchmark suite (specifically problem 50, \"ReLUSelfAttention\"). This is a stub/placeholder harness generated from the KernelBench framework, which is a known GPU kernel benchmark collection. The comment explicitly references \"KernelBench candidate 50\" and the task of implementing a fused ReLU self-attention kernel. However, the kernel itself is just a placeholder with no actual computation implemented.",
+  "raw_response": "SEEN_BEFORE: YES\nSOURCE: KernelBench benchmark suite (specifically problem 50, \"ReLUSelfAttention\"). This is a stub/placeholder harness generated from the KernelBench framework, which is a known GPU kernel benchmark collection. The comment explicitly references \"KernelBench candidate 50\" and the task of implementing a fused ReLU self-attention kernel. However, the kernel itself is just a placeholder with no actual computation implemented."
+}

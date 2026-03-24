@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_043",
+  "model": "gpt-5.4",
+  "seen_before": true,
+  "source_guess": "KernelBench / generated profiling harness template (likely the \u201c43_MinGPTCausalAttention\u201d entry)",
+  "raw_response": "SEEN_BEFORE: YES\n\nSOURCE: KernelBench / generated profiling harness template (likely the \u201c43_MinGPTCausalAttention\u201d entry)\n\nThis does not look like a real attention kernel implementation; it looks like an auto-generated placeholder harness. The comment `KernelBench candidate 43: 43_MinGPTCausalAttention` strongly points to a KernelBench benchmark entry, and the rest is just a stub (`TODO: materialize Q/K/V tensors...`) rather than code from a CUDA tutorial or optimized library."
+}

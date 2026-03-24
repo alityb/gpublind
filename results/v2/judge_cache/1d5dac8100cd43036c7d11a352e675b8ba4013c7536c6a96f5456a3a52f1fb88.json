@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly identified occupancy as the primary bottleneck rather than register spill, and compounded this with HIGH confidence, making it an overconfident error; it failed to identify the register spill mechanism and instead misattributed the low occupancy (which is itself a symptom of register pressure causing spills) as the root cause.",
+  "judge_model": "claude-sonnet-4-6"
+}

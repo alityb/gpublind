@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The bottleneck diagnosis of register-spill is correct, as it cites specific metrics like thread-local arrays sizes leading to register pressure and does not focus on the misleading signal.",
+  "judge_model": "openai/gpt-4o-mini"
+}

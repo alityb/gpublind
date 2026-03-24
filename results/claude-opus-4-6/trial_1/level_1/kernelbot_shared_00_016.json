@@ -1,0 +1,32 @@
+{
+  "kernel_id": "kernelbot_shared_00_016",
+  "model": "claude-opus-4-6",
+  "trial": 1,
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": null,
+  "predicted_label": "occupancy-limited",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: occupancy-limited\nREASONING: The kernel launches 256 blocks each with only 64 threads, but each block allocates 32\u00d732\u00d74 = 4096 bytes of shared memory and only uses 64 of the available threads, resulting in very low occupancy since the warp-level parallelism per SM is minimal with just 2 warps per block. Additionally, only a single column of the 32\u00d732 shared memory tile is ever written, meaning most of the allocated shared memory is wasted, further constraining the number of concurrent blocks per SM. The extremely low thread count per block combined with unnecessary shared memory allocation severely limits the SM's ability to hide latency through warp scheduling.",
+  "parsed_reasoning": "The kernel launches 256 blocks each with only 64 threads, but each block allocates 32\u00d732\u00d74 = 4096 bytes of shared memory and only uses 64 of the available threads, resulting in very low occupancy since the warp-level parallelism per SM is minimal with just 2 warps per block. Additionally, only a single column of the 32\u00d732 shared memory tile is ever written, meaning most of the allocated shared memory is wasted, further constraining the number of concurrent blocks per SM. The extremely low thread count per block combined with unnecessary shared memory allocation severely limits the SM's ability to hide latency through warp scheduling.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n__global__ void k(float* x){ __shared__ float tile[32][32]; int i = threadIdx.x; tile[i][0] = x[i]; } int main(){ k<<<256, 64>>>(0); }\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T19:07:50.393380+00:00",
+  "judge": {
+    "label_correct": 1,
+    "reasoning_grounded": 1,
+    "mislead_resistant": 1,
+    "explanation": "The model correctly identified the occupancy-limited bottleneck and grounded its reasoning in specific code evidence (64 threads per block = 2 warps, 32\u00d732 shared memory allocation limiting concurrent blocks), while correctly noting the shared memory appears allocated but is mostly unused rather than treating it as optimized.",
+    "judge_model": "claude-sonnet-4-6"
+  }
+}

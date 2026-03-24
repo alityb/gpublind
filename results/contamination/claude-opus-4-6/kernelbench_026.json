@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_026",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis is essentially a stub/placeholder file with no actual CUDA kernel implementation. It references \"KernelBench candidate 26: 26_ShuffleNet\" in a comment, suggesting it was generated as part of the KernelBench benchmark framework, but the kernel itself is entirely empty (just a `TODO` placeholder). There is no meaningful GPU kernel code to have seen before \u2014 it's a trivially empty harness that does nothing."
+}

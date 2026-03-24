@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_20",
+  "model": "claude-opus-4-6",
+  "condition": "C0",
+  "condition_name": "code_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "The kernel performs 2 global loads and 1 global store (12 bytes transferred) per element, with only 2 FLOPs (one multiply, one add via FMA) per element, yielding an arithmetic intensity of ~0.17 FLOP/byte \u2014 far below the A10G ridge point of 62 FLOP/byte. This places the kernel squarely in the memory-bound regime. With 64M elements and a grid-stride loop over contiguous indices, the access pattern achieves good coalescing, so DRAM utilization will be high and bandwidth will be the limiting factor rather than latency or compute.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: The kernel performs 2 global loads and 1 global store (12 bytes transferred) per element, with only 2 FLOPs (one multiply, one add via FMA) per element, yielding an arithmetic intensity of ~0.17 FLOP/byte \u2014 far below the A10G ridge point of 62 FLOP/byte. This places the kernel squarely in the memory-bound regime. With 64M elements and a grid-stride loop over contiguous indices, the access pattern achieves good coalescing, so DRAM utilization will be high and bandwidth will be the limiting factor rather than latency or compute.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel\nrunning on an NVIDIA A10G GPU (ridge point: 62 FLOP/byte).\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void double_buffer_kernel(const float* a, const float* b, float* out, int n) {\n\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    while (idx < n - 1) {\n        float v0 = a[idx];\n        float v1 = b[idx + 1];\n        out[idx] = v0 + v1 * 0.5f;\n        idx += stride;\n    }\n\n}\n\nint main() {\n    const int n = 1 << 26;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_a, *d_b, *d_c;\n    cudaMalloc(&d_a, bytes);\n    cudaMalloc(&d_b, bytes);\n    cudaMalloc(&d_c, bytes);\n    cudaMemset(d_a, 1, bytes);\n    cudaMemset(d_b, 2, bytes);\n    cudaMemset(d_c, 0, bytes);\n    double_buffer_kernel<<<4096, 256>>>(d_a, d_b, d_c, n);\n    cudaDeviceSynchronize();\n    double_buffer_kernel<<<4096, 256>>>(d_a, d_b, d_c, n);\n    cudaDeviceSynchronize();\n    float h = 0.0f;\n    cudaMemcpy(&h, d_c, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h);\n    cudaFree(d_a);\n    cudaFree(d_b);\n    cudaFree(d_c);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies the memory-bound bottleneck with HIGH confidence, cites specific metric values (arithmetic intensity of ~0.17 FLOP/byte, ridge point of 62 FLOP/byte, 64M elements, 12 bytes transferred per element), and correctly attributes the bottleneck to sustained DRAM bandwidth demand rather than the misleading mixed access pattern signal.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

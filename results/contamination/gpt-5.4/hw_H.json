@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_H",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis does not look like a recognizable public benchmark or tutorial kernel. It appears synthetic: large per-thread local arrays (`state0`, `state1`, `taps`, `mix`), heavy unrolling, modulo-indexed accesses, and lots of scalar FP ops designed to induce register pressure / spills rather than implement a standard algorithm. The name `spill_reference` also suggests a custom microbenchmark or test kernel, not a canonical benchmark/codebase example."
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy-limited as the bottleneck and cites specific metric values (42.9% occupancy, 0.0% DRAM BW, 0.0% stalls, 16 registers/thread) as evidence without primarily blaming the misleading shared memory signal, and the LOW confidence rating is appropriately calibrated given the ambiguous metrics (occupancy above the <35% threshold) and near-zero workload signals.",
+  "judge_model": "claude-sonnet-4-6"
+}

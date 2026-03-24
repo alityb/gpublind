@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_132",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\n\nSOURCE: UNKNOWN\n\nThis looks like a small synthetic/stress-test style CUDA kernel: simple index math, masked accesses into a 4096-element window, and a short accumulation loop. Those patterns are common in custom microbenchmarks, generated test kernels, or ad hoc examples, but I don\u2019t recognize this exact kernel as a known benchmark, tutorial, or widely identifiable codebase."
+}

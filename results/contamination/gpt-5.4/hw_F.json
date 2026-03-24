@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_F",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis looks like a custom tiled GEMM-style CUDA kernel, but not one I can confidently tie to a known benchmark, tutorial, or public codebase. The structure resembles standard shared-memory matrix multiplication examples, yet the unusual `counted_mul` / `counted_add` inline PTX wrappers and the `REUSE_ITERS` inner loop with scaling factors make it look more like a synthetic compute-intensity microbenchmark or hand-modified test kernel than a canonical published example."
+}

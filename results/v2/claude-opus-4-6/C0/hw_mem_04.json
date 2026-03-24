@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_04",
+  "model": "claude-opus-4-6",
+  "condition": "C0",
+  "condition_name": "code_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "This reduction kernel performs 1 FLOP (addition) per 4 bytes loaded, yielding an arithmetic intensity of ~0.25 FLOP/byte, which is far below the A10G ridge point of 62 FLOP/byte. The kernel streams through 256 MB of input data with minimal computation, making it squarely memory-bandwidth limited. With 4096 blocks \u00d7 256 threads = 1M threads and a grid-stride loop, there is ample parallelism and occupancy to saturate the memory subsystem, so DRAM utilization will be high while compute units remain underutilized.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: This reduction kernel performs 1 FLOP (addition) per 4 bytes loaded, yielding an arithmetic intensity of ~0.25 FLOP/byte, which is far below the A10G ridge point of 62 FLOP/byte. The kernel streams through 256 MB of input data with minimal computation, making it squarely memory-bandwidth limited. With 4096 blocks \u00d7 256 threads = 1M threads and a grid-stride loop, there is ample parallelism and occupancy to saturate the memory subsystem, so DRAM utilization will be high while compute units remain underutilized.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel\nrunning on an NVIDIA A10G GPU (ridge point: 62 FLOP/byte).\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void reduce_kernel(const float* __restrict__ in, float* __restrict__ partial, int n) {\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    float acc = 0.0f;\n    for (int idx = tid; idx < n; idx += stride) {\n        acc += in[idx];\n    }\n    if (tid < gridDim.x * blockDim.x) {\n        partial[tid] = acc;\n    }\n}\n\nint main() {\n    const int n = 1 << 26;\n    const int threads = 256;\n    const int blocks = 4096;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    const size_t partial_bytes = static_cast<size_t>(threads * blocks) * sizeof(float);\n    float *d_in, *d_partial;\n    cudaMalloc(&d_in, bytes);\n    cudaMalloc(&d_partial, partial_bytes);\n    cudaMemset(d_in, 1, bytes);\n    reduce_kernel<<<blocks, threads>>>(d_in, d_partial, n);\n    cudaDeviceSynchronize();\n    reduce_kernel<<<blocks, threads>>>(d_in, d_partial, n);\n    cudaDeviceSynchronize();\n    float h_out = 0.0f;\n    cudaMemcpy(&h_out, d_partial, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h_out);\n    cudaFree(d_in);\n    cudaFree(d_partial);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies the memory-bound bottleneck with HIGH confidence, cites specific metric values (0.25 FLOP/byte arithmetic intensity, 98% DRAM utilization, ridge point of 62 FLOP/byte) and concrete code patterns (1 FLOP per 4 bytes, grid-stride loop, 256 MB data), and correctly attributes the bottleneck to low arithmetic intensity and DRAM bandwidth saturation rather than the misleading long scoreboard stall signal.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

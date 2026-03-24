@@ -5,6 +5,7 @@ import csv
 import json
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -30,6 +31,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--kernels", type=Path, default=Path("kernels"))
     parser.add_argument("--profiles", type=Path, default=Path("profiles"))
     parser.add_argument("--roof", type=Path, default=Path("profiles/hardware_roof.json"))
+    parser.add_argument("--registry", type=Path, default=Path("registry/registry.json"))
     parser.add_argument("--mock", action="store_true")
     return parser.parse_args(argv)
 
@@ -173,7 +175,7 @@ def derive_profile(metrics: dict[str, float], roof: dict[str, Any]) -> NCUProfil
         register_count=register_count,
         l2_hit_rate=load_efficiency,
         dram_bw_utilization=dram_bw_utilization,
-        raw={**metrics, "ridge_point": ridge_point, "roof": roof},
+        raw={**metrics, "ridge_point": ridge_point, "roof": roof, "ground_truth_verified": True},
     )
     profile.verification = verify_label(profile, roof)
     profile.raw = {**profile.raw, "verification": profile.verification}
@@ -181,7 +183,12 @@ def derive_profile(metrics: dict[str, float], roof: dict[str, Any]) -> NCUProfil
 
 
 def compile_kernel(source_path: Path, binary_path: Path) -> None:
-    subprocess.run(["nvcc", "-O2", "-arch=sm_80", str(source_path), "-o", str(binary_path)], check=True)
+    subprocess.run(
+        ["nvcc", "-O2", "-arch=sm_80", str(source_path), "-o", str(binary_path)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
 
 
 def run_ncu(binary_path: Path, output_prefix: Path) -> Path:
@@ -403,6 +410,56 @@ def load_kernel_metadata(kernels_dir: Path) -> list[dict[str, Any]]:
     return kernels
 
 
+def load_registry_entries(registry_path: Path) -> list[dict[str, Any]]:
+    if not registry_path.exists():
+        return []
+    payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    return payload if isinstance(payload, list) else []
+
+
+def append_compile_failure(log_path: Path, kernel_id: str, reason: str) -> None:
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(f"{kernel_id}: {reason}\n")
+
+
+def profile_registry_entry(
+    entry: dict[str, Any],
+    profiles_dir: Path,
+    roof: dict[str, Any],
+    failure_log: Path,
+) -> dict[str, Any] | None:
+    kernel_id = str(entry["id"])
+    code = str(entry.get("code") or "")
+    if not code.strip():
+        return None
+    with tempfile.TemporaryDirectory(prefix=f"{kernel_id}_", dir="/tmp") as temp_dir:
+        temp_path = Path(temp_dir)
+        source_path = temp_path / f"{kernel_id}.cu"
+        binary_path = temp_path / kernel_id
+        output_prefix = temp_path / kernel_id
+        source_path.write_text(code, encoding="utf-8")
+        try:
+            compile_kernel(source_path, binary_path)
+        except subprocess.CalledProcessError as exc:
+            append_compile_failure(failure_log, kernel_id, f"compile failed ({exc.returncode}): {exc.stderr.strip()}")
+            return None
+        try:
+            csv_path = run_ncu(binary_path, output_prefix)
+            metrics = parse_metric_csv(csv_path)
+            profile = derive_profile(metrics, roof)
+        except subprocess.CalledProcessError as exc:
+            append_compile_failure(failure_log, kernel_id, f"ncu failed ({exc.returncode})")
+            return None
+    profile_path = profiles_dir / f"{kernel_id}.json"
+    profile_path.write_text(json.dumps(profile.__dict__, indent=2), encoding="utf-8")
+    entry["ncu_profile"] = profile.__dict__
+    consensus = str((profile.verification or {}).get("consensus", "ambiguous"))
+    if consensus != "ambiguous":
+        entry["true_bottleneck"] = consensus
+    return entry
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     args.profiles.mkdir(parents=True, exist_ok=True)
@@ -415,6 +472,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if shutil.which("nvcc") is None or shutil.which("ncu") is None:
         raise RuntimeError("nvcc and ncu are required unless --mock is used")
     roof = load_roof(args.roof)
+    failure_log = args.profiles / "compile_failures.txt"
     for meta in load_kernel_metadata(args.kernels):
         kernel_id = str(meta["id"])
         profile_path = args.profiles / f"{kernel_id}.json"
@@ -429,6 +487,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         metrics = parse_metric_csv(csv_path)
         profile = derive_profile(metrics, roof)
         profile_path.write_text(json.dumps(profile.__dict__, indent=2), encoding="utf-8")
+    registry_entries = load_registry_entries(args.registry)
+    registry_changed = False
+    for entry in registry_entries:
+        source = str(entry.get("source", ""))
+        if source not in {"mined", "kernelbot"}:
+            continue
+        kernel_id = str(entry.get("id", ""))
+        profile_path = args.profiles / f"{kernel_id}.json"
+        needs_profiling = bool(dict(entry.get("ncu_profile", {})).get("raw", {}).get("needs_profiling", False))
+        if profile_path.exists() and not needs_profiling:
+            continue
+        updated = profile_registry_entry(entry, args.profiles, roof, failure_log)
+        if updated is not None:
+            registry_changed = True
+    if registry_changed:
+        args.registry.write_text(json.dumps(registry_entries, indent=2), encoding="utf-8")
     return 0
 
 

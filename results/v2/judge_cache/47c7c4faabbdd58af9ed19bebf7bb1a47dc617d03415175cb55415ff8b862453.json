@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly identified the bottleneck as occupancy-limited rather than register-spill, and compounded the error by expressing HIGH confidence while also failing to cite the required terms (register, local memory, spill) and incorrectly dismissing register spill based on a register count assumption not supported by the provided metrics.",
+  "judge_model": "claude-sonnet-4-6"
+}

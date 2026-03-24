@@ -1,0 +1,24 @@
+{
+  "kernel_id": "kernelbot_dep_03_027",
+  "model": "gpt-5.4",
+  "condition": "C2",
+  "condition_name": "code_plus_metrics",
+  "true_bottleneck": "latency-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "Arithmetic intensity is low (0.50 FLOP/byte), but this is not memory-bandwidth-bound because DRAM utilization is 0.0% of peak and L2 hit rate is 100.0%, so accesses are being served from cache rather than saturating DRAM. The dominant stall is Long Scoreboard at 45.0% with zero Memory Dependency stalls, which matches waiting on dependent operations/load-use latency; occupancy is 55.0% and registers/thread is only 16, so this is not primarily occupancy-limited or register-spill limited.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: Arithmetic intensity is low (0.50 FLOP/byte), but this is not memory-bandwidth-bound because DRAM utilization is 0.0% of peak and L2 hit rate is 100.0%, so accesses are being served from cache rather than saturating DRAM. The dominant stall is Long Scoreboard at 45.0% with zero Memory Dependency stalls, which matches waiting on dependent operations/load-use latency; occupancy is 55.0% and registers/thread is only 16, so this is not primarily occupancy-limited or register-spill limited.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel.\n\nHardware performance counters (NVIDIA A10G):\nArithmetic Intensity: 0.50 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 55.0%\nDRAM Bandwidth Utilization: 0.0% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 45.0% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 16\n\nSource code:\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n// ===== KERNEL CODE START =====\n__global__ void k(float* x){ int i = threadIdx.x; float z = x[i]; z = z + 1.0f; z = z * 1.01f; z = z + 2.0f; z = z * 1.02f; z = z + 3.0f; z = z * 1.03f; x[i] = z; }\n// ===== KERNEL CODE END =====\n\nint main() {\n    const int n = 1 << 20;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_a, *d_b, *d_out;\n    cudaMalloc(&d_a, bytes);\n    cudaMalloc(&d_b, bytes);\n    cudaMalloc(&d_out, bytes);\n    cudaMemset(d_a, 1, bytes);\n    cudaMemset(d_b, 1, bytes);\n\n    k<<<(n + 255) / 256, 256>>>(d_a);\n    cudaDeviceSynchronize();\n\n    float h_out = 0.0f;\n    cudaMemcpy(&h_out, d_out, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h_out);\n\n    cudaFree(d_a);\n    cudaFree(d_b);\n    cudaFree(d_out);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies the bottleneck as latency-bound, cites relevant specific metrics, and does not primarily blame the misleading signal, while maintaining high confidence in the diagnosis.",
+    "judge_model": "openai/gpt-4o-mini"
+  }
+}

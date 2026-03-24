@@ -1,0 +1,24 @@
+{
+  "kernel_id": "kernelbot_dep_03_027",
+  "model": "claude-opus-4-6",
+  "condition": "C0",
+  "condition_name": "code_only",
+  "true_bottleneck": "latency-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "The kernel launches only 1 block of 256 threads (since `threadIdx.x` is used instead of a global index, only 256 elements are meaningfully processed per block, though 4096 blocks are launched, each block only uses threadIdx.x 0\u2013255). More critically, each thread performs a single load, a short dependent chain of 6 FLOPs (3 adds + 3 multiplies), and a single store \u2014 yielding an arithmetic intensity of ~6 FLOPs / 8 bytes = 0.75 FLOP/byte, far below the ridge point of 62 FLOP/byte. With so few arithmetic operations per memory access, the kernel cannot saturate either compute or memory bandwidth. The serial dependency chain (z depends on previous z) combined with extremely low operational intensity and insufficient work per thread means the kernel stalls waiting on memory latency with DRAM utilization remaining low \u2014 characteristic of a latency-bound rather than memory-bound scenario.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: The kernel launches only 1 block of 256 threads (since `threadIdx.x` is used instead of a global index, only 256 elements are meaningfully processed per block, though 4096 blocks are launched, each block only uses threadIdx.x 0\u2013255). More critically, each thread performs a single load, a short dependent chain of 6 FLOPs (3 adds + 3 multiplies), and a single store \u2014 yielding an arithmetic intensity of ~6 FLOPs / 8 bytes = 0.75 FLOP/byte, far below the ridge point of 62 FLOP/byte. With so few arithmetic operations per memory access, the kernel cannot saturate either compute or memory bandwidth. The serial dependency chain (z depends on previous z) combined with extremely low operational intensity and insufficient work per thread means the kernel stalls waiting on memory latency with DRAM utilization remaining low \u2014 characteristic of a latency-bound rather than memory-bound scenario.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel\nrunning on an NVIDIA A10G GPU (ridge point: 62 FLOP/byte).\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n// ===== KERNEL CODE START =====\n__global__ void k(float* x){ int i = threadIdx.x; float z = x[i]; z = z + 1.0f; z = z * 1.01f; z = z + 2.0f; z = z * 1.02f; z = z + 3.0f; z = z * 1.03f; x[i] = z; }\n// ===== KERNEL CODE END =====\n\nint main() {\n    const int n = 1 << 20;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_a, *d_b, *d_out;\n    cudaMalloc(&d_a, bytes);\n    cudaMalloc(&d_b, bytes);\n    cudaMalloc(&d_out, bytes);\n    cudaMemset(d_a, 1, bytes);\n    cudaMemset(d_b, 1, bytes);\n\n    k<<<(n + 255) / 256, 256>>>(d_a);\n    cudaDeviceSynchronize();\n\n    float h_out = 0.0f;\n    cudaMemcpy(&h_out, d_out, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h_out);\n\n    cudaFree(d_a);\n    cudaFree(d_b);\n    cudaFree(d_out);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 0,
+    "confidence_calibrated": 1,
+    "explanation": "The bottleneck label is correct and specific metrics/code patterns are cited (6 FLOPs per 8 bytes, serial dependency chain), but the response fails Stage 3 because it primarily blames low arithmetic intensity and insufficient work per thread (implicitly memory/compute-bound framing) rather than citing the key diagnostic signal of long scoreboard stalls (44.97%) as the primary evidence for latency-bound behavior, and does not use the required terms \"stall_long,\" \"long scoreboard,\" or \"dependency\" as the central explanation.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

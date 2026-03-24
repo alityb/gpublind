@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM correctly identified the latency-bound bottleneck with high confidence, cited specific evidence including the serial FMA dependency chain and low DRAM utilization, and correctly attributed the root cause to long scoreboard stalls from arithmetic dependencies rather than blaming global memory bandwidth as the primary issue.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

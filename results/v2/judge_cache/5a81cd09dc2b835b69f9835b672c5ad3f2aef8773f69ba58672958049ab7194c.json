@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM labeled the bottleneck as \"occupancy-limited\" rather than \"register-spill\" (local memory spill traffic), and did so with HIGH confidence despite being incorrect, earning a 0 for both the detection stage and calibration.",
+  "judge_model": "claude-sonnet-4-6"
+}

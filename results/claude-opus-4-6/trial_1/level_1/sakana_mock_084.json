@@ -1,0 +1,32 @@
+{
+  "kernel_id": "sakana_mock_084",
+  "model": "claude-opus-4-6",
+  "trial": 1,
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": null,
+  "predicted_label": "memory-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: memory-bound\nREASONING: The memory access patterns using `(i * 17) & 4095` and `(i + j * 257) & 4095` create non-coalesced, strided accesses across threads within a warp, severely degrading memory throughput. Both reads from `y` and repeated reads from `x` hit different cache lines per thread, causing excessive memory transactions relative to the minimal compute (a multiply-add per iteration). The arithmetic intensity is very low\u2014only 8 FMAs per thread versus 9 scattered global memory loads\u2014making this clearly limited by memory bandwidth and latency from poor access patterns.",
+  "parsed_reasoning": "The memory access patterns using `(i * 17) & 4095` and `(i + j * 257) & 4095` create non-coalesced, strided accesses across threads within a warp, severely degrading memory throughput. Both reads from `y` and repeated reads from `x` hit different cache lines per thread, causing excessive memory transactions relative to the minimal compute (a multiply-add per iteration). The arithmetic intensity is very low\u2014only 8 FMAs per thread versus 9 scattered global memory loads\u2014making this clearly limited by memory bandwidth and latency from poor access patterns.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n__global__ void kernel(float* x, const float* y) { int i = blockIdx.x * blockDim.x + threadIdx.x; float v = y[(i * 17) & 4095]; for (int j = 0; j < 8; ++j) { v = v * 1.1f + x[(i + j * 257) & 4095]; } x[i] = v; }\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T19:16:42.723638+00:00",
+  "judge": {
+    "label_correct": 1,
+    "reasoning_grounded": 1,
+    "mislead_resistant": 1,
+    "explanation": "The model correctly identified the memory-bound bottleneck, cited specific strided access patterns with concrete index formulas as evidence, and correctly argued that despite multiple arithmetic operations the low arithmetic intensity from inefficient memory patterns dominates.",
+    "judge_model": "claude-sonnet-4-6"
+  }
+}

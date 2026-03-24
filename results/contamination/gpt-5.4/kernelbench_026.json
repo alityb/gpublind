@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_026",
+  "model": "gpt-5.4",
+  "seen_before": true,
+  "source_guess": "KernelBench (likely a generated placeholder/profiling harness for the ShuffleNet candidate, e.g. \u201c26_ShuffleNet\u201d); not a real CUDA kernel implementation, but looks like benchmark scaffolding from that codebase.",
+  "raw_response": "SEEN_BEFORE: YES\n\nSOURCE: KernelBench (likely a generated placeholder/profiling harness for the ShuffleNet candidate, e.g. \u201c26_ShuffleNet\u201d); not a real CUDA kernel implementation, but looks like benchmark scaffolding from that codebase."
+}

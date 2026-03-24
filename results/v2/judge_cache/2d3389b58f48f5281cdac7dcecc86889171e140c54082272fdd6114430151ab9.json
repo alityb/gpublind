@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies register-spill as the bottleneck, supports it with specific evidence (576 floats, 2,304 registers per thread, 255-register hardware limit, `__launch_bounds__(128,1)`), avoids blaming the misleading signal (hw_reg_02/dense filter), and HIGH confidence is warranted given the correct diagnosis.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

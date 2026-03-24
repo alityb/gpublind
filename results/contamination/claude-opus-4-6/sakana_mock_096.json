@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_096",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/toy microbenchmark, likely hand-crafted to test specific memory access patterns (the `& 4095` masking for circular buffer access, the stride of 17 and 257 which are coprime numbers to create irregular access patterns, and the small unrolled loop with a simple FMA-like computation). It doesn't match any well-known benchmark suite (Rodinia, Parboil, SHOC, etc.), CUDA SDK sample, or commonly referenced tutorial code. It looks like something someone wrote to experiment with memory access patterns or cache behavior."
+}

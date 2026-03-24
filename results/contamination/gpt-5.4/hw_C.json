@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_C",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis does not look like a standard benchmark, tutorial, or well-known codebase kernel. It appears synthetic/adversarial: the inline PTX `counted_mul`/`counted_add`, odd pointer-chasing/index math, and especially the suspicious `__syncthreads()` inside a branch are more consistent with a custom stress/test kernel than a recognizable public example. Conservatively, I would not claim it matches a known source."
+}

@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_H",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetically constructed \"register spill\" stress test, deliberately designed to force high register pressure and local memory spilling by allocating very large local arrays (`state0[192]`, `state1[160]`, `taps[128]`, `mix[64]`) and performing extensive unrolled computations over them. While the general *concept* of register-pressure/spill benchmarks exists in GPU performance testing, this specific kernel with its particular array sizes, indexing patterns (e.g., `phase * 19`, `phase * 23 + 37`, the specific constants like `0.0009765625f`), and structure does not match any known public benchmark, tutorial, or open-source codebase I'm aware of. It looks like a custom-crafted microbenchmark, possibly created to study or demonstrate register spilling behavior on NVIDIA GPUs."
+}

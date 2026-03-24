@@ -1,0 +1,20 @@
+{
+  "id": "hw_A",
+  "source": "handwritten",
+  "true_bottleneck": "memory-bound",
+  "misleading_signal": "the traversal and tile comment make the access pattern look cache-friendly, while the kernel spends many arithmetic ops per fetched element",
+  "correct_explanation": "irregular global memory accesses reduce load efficiency and make memory traffic dominate runtime",
+  "difficulty": "hard",
+  "category": "memory-bound",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "effective stride hidden in edge_slot",
+      "global load efficiency"
+    ],
+    "must_not_cite_as_primary": [
+      "high FLOP count",
+      "inner-loop arithmetic density"
+    ]
+  },
+  "hardware": "A10G"
+}

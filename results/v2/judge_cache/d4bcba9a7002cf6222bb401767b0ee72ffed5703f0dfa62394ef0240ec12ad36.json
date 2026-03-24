@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 0,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "While the bottleneck label is correct (latency-bound), the reasoning fabricates metrics (claiming AI\u22481.5 FLOP/byte and \"perfectly coalesced\" access) rather than citing the actual profiling data (84.23% Stall Long Scoreboard, 0.0008% DRAM BW), and confidently attributes latency to a \"dependent FMAs/adds chain\" without referencing the key evidence, so STAGE_2 fails for lack of specific metric citation from the provided data; additionally, HIGH confidence paired with fabricated evidence warrants a calibration penalty.",
+  "judge_model": "claude-sonnet-4-6"
+}

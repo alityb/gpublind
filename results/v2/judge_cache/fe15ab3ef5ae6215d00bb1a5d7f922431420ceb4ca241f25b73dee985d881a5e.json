@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The diagnosis accurately identifies the bottleneck as occupancy-limited, provides specific evidence for the reasoning, and does not primarily blame the misleading signal, all while demonstrating high confidence.",
+  "judge_model": "openai/gpt-4o-mini"
+}

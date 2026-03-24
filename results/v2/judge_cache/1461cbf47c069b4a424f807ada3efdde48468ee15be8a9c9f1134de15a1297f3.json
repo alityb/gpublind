@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 0,
+  "confidence_calibrated": 0,
+  "explanation": "While the bottleneck label is correct and specific metrics are cited (arithmetic intensity values), the response fails STAGE_3 because it does NOT cite the required \"stall_long_sb_pct\" (57.06%) metric and instead primarily frames the diagnosis around arithmetic intensity and the streaming load/store pattern (the misleading signal), and it is overconfident (HIGH) while making these critical reasoning errors including failing to cite the mandatory stall_long_sb_pct metric.",
+  "judge_model": "claude-sonnet-4-6"
+}

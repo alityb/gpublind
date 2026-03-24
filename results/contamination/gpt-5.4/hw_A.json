@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_A",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis does not look like a recognizable kernel from a standard CUDA benchmark, tutorial, or well-known codebase. It appears more like a synthetic/custom memory-access and arithmetic-mix kernel: the indexing is unusual, the math is arbitrary-looking, and the names are generic. I don\u2019t recognize it as coming from common suites like Rodinia, Parboil, SHOC, CUTLASS, CUDA samples, or graph/traversal libraries."
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the latency-bound bottleneck with high confidence, cites the specific 84.3% Stall Long Scoreboard metric and 0.0% DRAM bandwidth utilization as evidence, and correctly attributes the root cause to instruction dependency chain latency rather than the misleading memory/bandwidth signal.",
+  "judge_model": "claude-sonnet-4-6"
+}

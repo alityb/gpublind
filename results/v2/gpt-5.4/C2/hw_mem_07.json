@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_07",
+  "model": "gpt-5.4",
+  "condition": "C2",
+  "condition_name": "code_plus_metrics",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "Arithmetic intensity is 0.00 FLOP/byte, so this is not compute-bound, but DRAM bandwidth utilization is only 47.5% of peak, which is too low to indicate a true bandwidth-saturated memory-bound kernel. The dominant stall is Long Scoreboard at 40.9% with 93.1% occupancy, while L2 hit rate and global load efficiency are both 100%, indicating threads are primarily waiting on load completion latency rather than suffering from poor occupancy, spills, or saturated DRAM throughput.",
+  "correct": false,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: Arithmetic intensity is 0.00 FLOP/byte, so this is not compute-bound, but DRAM bandwidth utilization is only 47.5% of peak, which is too low to indicate a true bandwidth-saturated memory-bound kernel. The dominant stall is Long Scoreboard at 40.9% with 93.1% occupancy, while L2 hit rate and global load efficiency are both 100%, indicating threads are primarily waiting on load completion latency rather than suffering from poor occupancy, spills, or saturated DRAM throughput.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel.\n\nHardware performance counters (NVIDIA A10G):\nArithmetic Intensity: 0.00 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 93.1%\nDRAM Bandwidth Utilization: 47.5% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 40.9% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 26\n\nSource code:\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void scale_kernel(const double* __restrict__ in, double* __restrict__ out, double scale, int n) {\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    while (idx < n) {\n        out[idx] = in[idx] * scale;\n        idx += stride;\n    }\n}\n\nint main() {\n    const int n = 1 << 26;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(double);\n    double *d_in, *d_out;\n    cudaMalloc(&d_in, bytes);\n    cudaMalloc(&d_out, bytes);\n    cudaMemset(d_in, 1, bytes);\n    scale_kernel<<<4096, 256>>>(d_in, d_out, 2.0, n);\n    cudaDeviceSynchronize();\n    scale_kernel<<<4096, 256>>>(d_in, d_out, 2.0, n);\n    cudaDeviceSynchronize();\n    double h_out = 0.0;\n    cudaMemcpy(&h_out, d_out, sizeof(double), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h_out);\n    cudaFree(d_in);\n    cudaFree(d_out);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 0,
+    "stage_2_rvr": null,
+    "stage_3_mpr": null,
+    "confidence_calibrated": 0,
+    "explanation": "The identified bottleneck as latency-bound is incorrect since the true bottleneck is memory-bound, leading to an overconfidence error despite the detailed reasoning.",
+    "judge_model": "openai/gpt-4o-mini"
+  }
+}

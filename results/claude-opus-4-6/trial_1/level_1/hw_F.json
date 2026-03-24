@@ -1,0 +1,32 @@
+{
+  "kernel_id": "hw_F",
+  "model": "claude-opus-4-6",
+  "trial": 1,
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "compute-bound",
+  "correct_explanation": "shared-memory tiling and repeated tile reuse drive arithmetic intensity far above the roofline ridge point",
+  "predicted_label": "memory-bound",
+  "correct": false,
+  "severity": 2,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: memory-bound\nREASONING: Mock response for hw_F at level 1.",
+  "parsed_reasoning": "Mock response for hw_F at level 1.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\nconstexpr int BLOCK_THREADS = 16;\nconstexpr int TILE_M = 32;\nconstexpr int TILE_N = 32;\nconstexpr int TILE_K = 32;\nconstexpr int REUSE_ITERS = 32;\n\n__device__ __forceinline__ float counted_mul(float a, float b) {\n    float out;\n    asm volatile(\"mul.rn.f32 %0, %1, %2;\" : \"=f\"(out) : \"f\"(a), \"f\"(b));\n    return out;\n}\n\n__device__ __forceinline__ float counted_add(float a, float b) {\n    float out;\n    asm volatile(\"add.rn.f32 %0, %1, %2;\" : \"=f\"(out) : \"f\"(a), \"f\"(b));\n    return out;\n}\n\n__global__ void tiled_gemm(const float* a, const float* b, float* c, int n) {\n    __shared__ float tile_a[TILE_M][TILE_K];\n    __shared__ float tile_b[TILE_K][TILE_N];\n\n    int tx = threadIdx.x;\n    int ty = threadIdx.y;\n    int row0 = blockIdx.y * TILE_M + ty * 2;\n    int col0 = blockIdx.x * TILE_N + tx * 2;\n\n    float acc00 = 0.0f;\n    float acc01 = 0.0f;\n    float acc10 = 0.0f;\n    float acc11 = 0.0f;\n\n    for (int k0 = 0; k0 < n; k0 += TILE_K) {\n        tile_a[ty * 2 + 0][tx * 2 + 0] = a[(row0 + 0) * n + (k0 + tx * 2 + 0)];\n        tile_a[ty * 2 + 0][tx * 2 + 1] = a[(row0 + 0) * n + (k0 + tx * 2 + 1)];\n        tile_a[ty * 2 + 1][tx * 2 + 0] = a[(row0 + 1) * n + (k0 + tx * 2 + 0)];\n        tile_a[ty * 2 + 1][tx * 2 + 1] = a[(row0 + 1) * n + (k0 + tx * 2 + 1)];\n        tile_b[ty * 2 + 0][tx * 2 + 0] = b[(k0 + ty * 2 + 0) * n + (col0 + 0)];\n        tile_b[ty * 2 + 0][tx * 2 + 1] = b[(k0 + ty * 2 + 0) * n + (col0 + 1)];\n        tile_b[ty * 2 + 1][tx * 2 + 0] = b[(k0 + ty * 2 + 1) * n + (col0 + 0)];\n        tile_b[ty * 2 + 1][tx * 2 + 1] = b[(k0 + ty * 2 + 1) * n + (col0 + 1)];\n        __syncthreads();\n\n        #pragma unroll\n        for (int kk = 0; kk < TILE_K; ++kk) {\n            float a0 = tile_a[ty * 2 + 0][kk];\n            float a1 = tile_a[ty * 2 + 1][kk];\n            float b0 = tile_b[kk][tx * 2 + 0];\n            float b1 = tile_b[kk][tx * 2 + 1];\n            #pragma unroll\n            for (int repeat = 0; repeat < REUSE_ITERS; ++repeat) {\n                float scale = 1.0f + 0.0009765625f * static_cast<float>(repeat);\n                acc00 = counted_add(acc00, counted_mul(counted_mul(a0, b0), scale));\n                acc01 = counted_add(acc01, counted_mul(counted_mul(a0, b1), scale));\n                acc10 = counted_add(acc10, counted_mul(counted_mul(a1, b0), scale));\n                acc11 = counted_add(acc11, counted_mul(counted_mul(a1, b1), scale));\n            }\n        }\n        __syncthreads();\n    }\n\n    c[(row0 + 0) * n + (col0 + 0)] = acc00;\n    c[(row0 + 0) * n + (col0 + 1)] = acc01;\n    c[(row0 + 1) * n + (col0 + 0)] = acc10;\n    c[(row0 + 1) * n + (col0 + 1)] = acc11;\n}\n\nint main() {\n    const int n = 1024;\n    const size_t bytes = static_cast<size_t>(n) * static_cast<size_t>(n) * sizeof(float);\n    float* h = new float[n * n];\n    float *a, *b, *c;\n    cudaMalloc(&a, bytes);\n    cudaMalloc(&b, bytes);\n    cudaMalloc(&c, bytes);\n    for (int i = 0; i < n * n; ++i) {\n        h[i] = static_cast<float>((i * 7) % 127) * 0.0078125f;\n    }\n    cudaMemcpy(a, h, bytes, cudaMemcpyHostToDevice);\n    cudaMemcpy(b, h, bytes, cudaMemcpyHostToDevice);\n    dim3 block(BLOCK_THREADS, BLOCK_THREADS);\n    dim3 grid(n / TILE_N, n / TILE_M);\n    tiled_gemm<<<grid, block>>>(a, b, c, n);\n    cudaMemcpy(h, c, bytes, cudaMemcpyDeviceToHost);\n    std::printf(\"%f\\n\", h[5]);\n    cudaFree(a);\n    cudaFree(b);\n    cudaFree(c);\n    delete[] h;\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T19:18:25.552138+00:00",
+  "judge": {
+    "label_correct": 0,
+    "reasoning_grounded": 0,
+    "mislead_resistant": 1,
+    "explanation": "Mock judge scored label, groundedness, and misleading-signal resistance heuristically.",
+    "judge_model": "mock-judge"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy-limited as the bottleneck with high confidence, cites specific metric values (2.1% occupancy, 0.3% DRAM utilization, 3.4% scoreboard stalls, 64KB shared memory, 32-thread block size), and correctly attributes the root cause to launch geometry and shared memory constraints rather than the misleading compute-heavy signal.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

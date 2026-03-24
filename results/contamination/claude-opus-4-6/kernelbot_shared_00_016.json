@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbot_shared_00_016",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis is a trivial/toy snippet that declares a shared memory tile and does a simple load into it. While the `__shared__ float tile[32][32]` pattern is extremely common in CUDA tutorials (especially tiled matrix multiplication examples), this specific kernel doesn't actually do anything meaningful \u2014 it only writes to `tile[i][0]`, launches with mismatched dimensions (64 threads but only a 32\u00d732 tile), passes a null pointer, and doesn't correspond to any recognizable benchmark or tutorial. It looks like a hand-written minimal or throwaway example, not something from a known codebase."
+}

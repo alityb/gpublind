@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_060",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/hand-crafted microbenchmark rather than something from a known benchmark suite, tutorial, or public codebase. The specific patterns \u2014 the magic constants (17, 4095, 257, 8), the bitwise AND masking for index wrapping, and the particular accumulation loop structure \u2014 look like they were deliberately constructed, possibly to test cache behavior, memory access patterns, or compiler optimizations. It doesn't match any well-known CUDA samples, Rodinia, Parboil, or other standard benchmark kernels I'm aware of."
+}

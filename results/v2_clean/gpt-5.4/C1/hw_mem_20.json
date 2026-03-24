@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_20",
+  "model": "gpt-5.4",
+  "condition": "C1",
+  "condition_name": "metrics_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "Arithmetic intensity is 0.00 FLOP/byte, far below the 62 FLOP/byte ridge point, so the kernel has essentially no compute work relative to data movement. DRAM bandwidth utilization is extremely high at 110.4% of peak (496 GB/s) with 100.0% global load efficiency, indicating throughput is capped by memory bandwidth rather than poor access patterns; high occupancy (89.3%) and modest register use (26/thread) rule out occupancy and register-spill limits.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: Arithmetic intensity is 0.00 FLOP/byte, far below the 62 FLOP/byte ridge point, so the kernel has essentially no compute work relative to data movement. DRAM bandwidth utilization is extremely high at 110.4% of peak (496 GB/s) with 100.0% global load efficiency, indicating throughput is capped by memory bandwidth rather than poor access patterns; high occupancy (89.3%) and modest register use (26/thread) rule out occupancy and register-spill limits.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the bottleneck of a CUDA kernel on NVIDIA A10G given\nthese hardware performance counters. You will NOT see the source.\n\nArithmetic Intensity: 0.00 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 89.3%\nDRAM Bandwidth Utilization: 110.4% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 98.9% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 26\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The diagnosis correctly identifies the memory-bound bottleneck and effectively supports its reasoning with specific metric values, while not attributing the issue to the misleading signal.",
+    "judge_model": "openai/gpt-4o-mini"
+  }
+}

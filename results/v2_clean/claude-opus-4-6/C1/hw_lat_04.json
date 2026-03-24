@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_lat_04",
+  "model": "claude-opus-4-6",
+  "condition": "C1",
+  "condition_name": "metrics_only",
+  "true_bottleneck": "latency-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "The kernel exhibits 97.1% of active cycles stalled on long scoreboard waits, which indicates warps are blocked waiting for the results of dependent operations (typically memory loads or other long-latency instructions). Despite 100% global load efficiency and 98.6% occupancy, DRAM bandwidth utilization is only 0.2% of peak, ruling out a memory-bound diagnosis \u2014 the data is being served entirely from the L2 cache (100% hit rate), but the latency of those accesses still dominates execution time. The extremely low arithmetic intensity (0.02 FLOP/byte, far below the 62 FLOP/byte ridge point) confirms the kernel performs almost no compute, so the pipeline is overwhelmingly stalled on data dependency latencies that even near-full occupancy cannot hide.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: The kernel exhibits 97.1% of active cycles stalled on long scoreboard waits, which indicates warps are blocked waiting for the results of dependent operations (typically memory loads or other long-latency instructions). Despite 100% global load efficiency and 98.6% occupancy, DRAM bandwidth utilization is only 0.2% of peak, ruling out a memory-bound diagnosis \u2014 the data is being served entirely from the L2 cache (100% hit rate), but the latency of those accesses still dominates execution time. The extremely low arithmetic intensity (0.02 FLOP/byte, far below the 62 FLOP/byte ridge point) confirms the kernel performs almost no compute, so the pipeline is overwhelmingly stalled on data dependency latencies that even near-full occupancy cannot hide.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the bottleneck of a CUDA kernel on NVIDIA A10G given\nthese hardware performance counters. You will NOT see the source.\n\nArithmetic Intensity: 0.02 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 98.6%\nDRAM Bandwidth Utilization: 0.2% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 97.1% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 16\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies the latency-bound bottleneck with high confidence, cites specific metric values (97.1% long scoreboard stalls, 0.2% DRAM BW utilization, 98.6% occupancy), and correctly attributes the bottleneck to dependency latency from cache-served loads rather than the misleading DRAM bandwidth signal.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

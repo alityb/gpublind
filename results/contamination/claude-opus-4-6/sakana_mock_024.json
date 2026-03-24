@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_024",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/contrived microbenchmark or test kernel. The specific characteristics \u2014 arbitrary magic constants (17, 4095, 257, 1.1f), the bit-masking for index wrapping, and the small unrolled loop with a multiply-add pattern \u2014 suggest it was hand-written to test or demonstrate some specific memory access pattern or compute behavior, rather than being from a well-known benchmark suite, tutorial, or open-source project. I don't recognize it from any known source."
+}

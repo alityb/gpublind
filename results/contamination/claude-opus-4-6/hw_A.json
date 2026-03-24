@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_A",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be synthetically constructed or obfuscated. Several characteristics suggest it's artificially created rather than from a known benchmark or tutorial:\n\n1. The index computation pattern (`tile_base` with bitwise operations involving lane IDs, `& (n-1)` wrapping) looks deliberately convoluted rather than serving a clear algorithmic purpose.\n2. The accumulation loop with arbitrary magic constants (0.375, 0.125, 0.50, 0.75, 0.25) and a mix of additions/subtractions of various polynomial terms of `x` and `y` doesn't correspond to any recognizable algorithm (not a standard reduction, stencil, graph traversal, or physics computation).\n3. The naming (\"traversal_kernel\", \"edge_slot\", \"tile_span\") suggests graph traversal but the actual computation bears no resemblance to BFS, SSSP, PageRank, or any standard graph algorithm.\n4. The combination of warp-level lane manipulation with the arbitrary arithmetic feels like it was composed to look complex without implementing a real workload."
+}

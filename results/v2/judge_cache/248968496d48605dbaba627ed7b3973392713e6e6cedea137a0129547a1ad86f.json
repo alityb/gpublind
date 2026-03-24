@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy-limited as the bottleneck with high confidence, cites specific metric values (32.5% occupancy, 6.8% DRAM BW, 48 KB shared memory, 2 blocks per SM, 512/1536 threads), correctly attributes the root cause to shared memory limiting blocks per SM rather than the misleading compute-heavy signal, and appropriately explains that Long Scoreboard stalls are a symptom rather than the primary cause.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

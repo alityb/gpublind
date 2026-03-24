@@ -1,0 +1,25 @@
+{
+  "kernel_id": "kernelbot_shared_00_016",
+  "model": "gpt-5.4",
+  "trial": 1,
+  "level": 2,
+  "question_format": "label",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": null,
+  "predicted_label": "occupancy-limited",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: occupancy-limited\nREASONING: The achieved occupancy is only 8.55%, which indicates very poor SM utilization and is the strongest signal in the profile. Memory is not the bottleneck here because global load efficiency is 100% and DRAM bandwidth utilization is 0.0%, so the kernel is primarily limited by low occupancy rather than memory throughput.",
+  "parsed_reasoning": "The achieved occupancy is only 8.55%, which indicates very poor SM utilization and is the strongest signal in the profile. Memory is not the bottleneck here because global load efficiency is 100% and DRAM bandwidth utilization is 0.0%, so the kernel is primarily limited by low occupancy rather than memory throughput.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel.\n\nProfiling data:\n- Latency: 0.0ms\n- Achieved occupancy: 8.55%\n- Global load efficiency: 100.0%\n- DRAM bandwidth utilization: 0.0%\n\n```cuda\n__global__ void k(float* x){ __shared__ float tile[32][32]; int i = threadIdx.x; tile[i][0] = x[i]; } int main(){ k<<<256, 64>>>(0); }\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T18:57:41.125045+00:00"
+}

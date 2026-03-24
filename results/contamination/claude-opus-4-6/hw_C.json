@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_C",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/contrived benchmark or test case, likely hand-crafted. Several characteristics suggest it was deliberately constructed rather than coming from a known codebase:\n\n1. The `counted_mul`/`counted_add` inline PTX wrappers with `asm volatile` are a technique used in FLOP-counting microbenchmarks, but this specific pattern doesn't match any well-known benchmark suite (e.g., not from mixbench, GPU-STREAM, or similar).\n\n2. The \"suspicious_sync\" name and the deliberate `__syncthreads()` inside both branches of an `if/else` on `blockIdx.x & 1` looks like it was designed as a trick question or correctness test (the sync is actually valid since all threads in a block take the same branch, as `blockIdx.x` is uniform within a block).\n\n3. The specific magic constants (37, 97, 119, 17, 257, 131, 193, etc.) for pseudo-random index chasing, combined with the particular mixing loop structure, don't match any known benchmark or tutorial I've encountered.\n\n4. The overall structure\u2014random gather with pointer chasing, combined with arithmetic intensity from the inner mixing loop\u2014seems purpose-built, possibly for testing FLOP counting tools or profiling accuracy."
+}

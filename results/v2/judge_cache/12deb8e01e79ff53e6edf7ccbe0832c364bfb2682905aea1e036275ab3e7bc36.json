@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the latency-bound bottleneck with high confidence, cites the specific Long Scoreboard stall value (84.3%) as primary evidence, and explicitly avoids blaming bandwidth/global memory throughput by noting DRAM utilization is near zero and framing the issue as latency rather than throughput.",
+  "judge_model": "claude-sonnet-4-6"
+}

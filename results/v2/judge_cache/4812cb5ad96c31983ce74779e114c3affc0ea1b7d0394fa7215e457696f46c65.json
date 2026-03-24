@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies register-spill as the bottleneck, cites specific evidence (544 floats in local arrays, 2176 bytes, exceeding the 255-register hardware limit, `__launch_bounds__(128, 1)`), correctly attributes the cause to local memory spill traffic rather than the misleading sequential streaming structure, and the HIGH confidence is warranted given the correct diagnosis.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

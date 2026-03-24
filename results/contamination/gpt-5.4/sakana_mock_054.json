@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_054",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\n\nSOURCE: UNKNOWN\n\nThis looks like a small synthetic CUDA microbenchmark/stress kernel rather than something I can confidently match to a known benchmark, tutorial, or public codebase. The indexed masking with `& 4095`, stride constants like `17` and `257`, and the short arithmetic loop are typical of hand-written cache/memory-access test kernels. I would not reliably attribute it to a specific known source."
+}

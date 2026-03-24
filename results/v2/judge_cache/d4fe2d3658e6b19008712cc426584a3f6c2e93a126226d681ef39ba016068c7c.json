@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the latency-bound bottleneck, cites specific metric values (98.9% long scoreboard stalls, 0.2% DRAM BW utilization, 99.1% occupancy), correctly attributes the bottleneck to dependency chain latency rather than memory bandwidth, and the high confidence is warranted given the correct diagnosis.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

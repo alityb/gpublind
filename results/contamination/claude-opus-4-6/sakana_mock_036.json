@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_036",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/hand-crafted microbenchmark rather than something from a known benchmark suite, tutorial, or public codebase. The specific patterns \u2014 the arbitrary constants (17, 4095, 257, 8), the bitwise AND masking for index wrapping, and the accumulation loop with `1.1f` \u2014 look like they were deliberately constructed to test specific memory access patterns or arithmetic throughput, but they don't match any well-known benchmark or tutorial kernel I can identify."
+}

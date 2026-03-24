@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy-limited as the bottleneck, cites specific metric values (8.3% achieved occupancy, 96 KB shared memory per block, 100 KB SM capacity), correctly attributes the root cause to shared memory allocation limiting concurrent blocks rather than the misleading high arithmetic intensity signal, and HIGH confidence is appropriate given the correct diagnosis.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_204",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\n\nSOURCE: UNKNOWN\n\nThis looks like a small synthetic/stress-test style CUDA kernel using arbitrary constants and masked indexing over a 4096-element region. I don\u2019t recognize it as a standard kernel from a well-known benchmark, tutorial, or public codebase, and it does not match common canonical examples like SAXPY, stencil, reduction, transpose, GEMM, etc. Conservatively, I\u2019d say no."
+}

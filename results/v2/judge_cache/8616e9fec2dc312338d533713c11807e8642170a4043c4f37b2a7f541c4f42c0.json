@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" (with HIGH confidence) when the true bottleneck is memory-bound, and it fell for the misleading signal by using the 47.5% DRAM BW utilization as evidence against memory-boundedness and elevating Long Scoreboard stalls as the primary diagnosis\u2014exactly the forbidden primary cause.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

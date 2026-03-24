@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The diagnosis inaccurately identifies the bottleneck as latency-bound instead of occupancy-limited, resulting in an overall misunderstanding of the performance issue despite high confidence in the incorrect assessment.",
+  "judge_model": "openai/gpt-4o-mini"
+}

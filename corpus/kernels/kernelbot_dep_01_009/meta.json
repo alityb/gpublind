@@ -1,0 +1,21 @@
+{
+  "id": "kernelbot_dep_01_009",
+  "source": "kernelbot",
+  "true_bottleneck": "latency-bound",
+  "misleading_signal": "sequential dependencies create long scoreboard stalls - looks memory-bound due to load instructions",
+  "correct_explanation": "sequential dependencies create long scoreboard stalls - looks memory-bound due to load instructions",
+  "difficulty": "medium",
+  "category": "latency-bound",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "stall_long",
+      "long scoreboard",
+      "dependency"
+    ],
+    "must_not_cite_as_primary": [
+      "global memory",
+      "bandwidth"
+    ]
+  },
+  "hardware": "A10G"
+}

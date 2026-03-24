@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM incorrectly identified the bottleneck as \"latency-bound\" rather than \"occupancy-limited\" (the true bottleneck), though it did note the 51.9% occupancy metric; the MEDIUM confidence rating is appropriate given the incorrect diagnosis, so confidence calibration is correct.",
+  "judge_model": "claude-sonnet-4-6"
+}

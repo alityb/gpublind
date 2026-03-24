@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_024",
+  "model": "claude-opus-4-6",
+  "seen_before": true,
+  "source_guess": "This is a stub/placeholder generated from the **KernelBench** benchmark suite (specifically task 24, EfficientNetB2). KernelBench is a known benchmark for evaluating GPU kernel generation. This is clearly an auto-generated harness template that hasn't been filled in yet \u2014 it contains no actual kernel logic, just a TODO comment referencing KernelBench's PyTorch reference for EfficientNetB2.",
+  "raw_response": "SEEN_BEFORE: YES\nSOURCE: This is a stub/placeholder generated from the **KernelBench** benchmark suite (specifically task 24, EfficientNetB2). KernelBench is a known benchmark for evaluating GPU kernel generation. This is clearly an auto-generated harness template that hasn't been filled in yet \u2014 it contains no actual kernel logic, just a TODO comment referencing KernelBench's PyTorch reference for EfficientNetB2."
+}

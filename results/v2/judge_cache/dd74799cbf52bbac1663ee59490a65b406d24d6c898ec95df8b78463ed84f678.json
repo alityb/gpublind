@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 0,
+  "confidence_calibrated": 0,
+  "explanation": "While the bottleneck label is correct and specific metrics are cited, the reasoning incorrectly focuses on arithmetic intensity and coalescing (the misleading bandwidth signal) as primary evidence rather than citing the dominant 83.47% stall_long scoreboard metric, and the HIGH confidence is penalized because the stated reasoning is fundamentally misdirected despite accidentally reaching the correct conclusion.",
+  "judge_model": "claude-sonnet-4-6"
+}

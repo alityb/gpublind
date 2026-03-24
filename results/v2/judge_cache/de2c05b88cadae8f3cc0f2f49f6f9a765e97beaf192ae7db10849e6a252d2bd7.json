@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies compute-bound as the bottleneck, cites specific metric values (arithmetic intensity of 130 FLOP/byte vs. ridge point of 62 FLOP/byte, DRAM BW utilization of 0.1%, stall rate of 0.5%, occupancy of 80.2%), avoids blaming shared memory or load instructions as the primary cause, and justifiably expresses HIGH confidence given the correct diagnosis.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

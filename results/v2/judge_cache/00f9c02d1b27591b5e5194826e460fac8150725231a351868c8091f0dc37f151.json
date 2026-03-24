@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 0,
+  "confidence_calibrated": 0,
+  "explanation": "While the bottleneck label is correct and specific metrics/code patterns are cited, the response fails Stage 3 because it primarily frames the diagnosis around arithmetic intensity and the roofline model (the misleading memory/bandwidth signal) rather than leading with the actual evidence of long scoreboard stalls (84.12%), and it also claims HIGH confidence while providing incorrect reasoning about the primary cause (citing dependent FP operations and low DRAM traffic rather than the dominant stall_long scoreboard metric).",
+  "judge_model": "claude-sonnet-4-6"
+}

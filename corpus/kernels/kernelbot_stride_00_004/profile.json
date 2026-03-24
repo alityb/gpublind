@@ -1,0 +1,25 @@
+{
+  "needs_profiling": true,
+  "arithmetic_intensity_flop_per_byte": -1,
+  "achieved_occupancy_pct": -1,
+  "dram_bw_utilization_pct": -1,
+  "stall_long_scoreboard_pct": -1,
+  "stall_memory_pct": -1,
+  "global_load_efficiency_pct": -1,
+  "l2_hit_rate_pct": -1,
+  "register_count_per_thread": -1,
+  "hardware": {
+    "name": "NVIDIA A10G",
+    "peak_bw_gbps": 496.0,
+    "peak_flops_tflops": 30.77,
+    "ridge_point_flop_per_byte": 62.07
+  },
+  "verification": {
+    "roofline_test": "memory-bound",
+    "bandwidth_test": "occupancy-limited",
+    "stall_test": "occupancy-limited",
+    "consensus": "occupancy-limited",
+    "confidence": "medium"
+  },
+  "compile_status": "success"
+}

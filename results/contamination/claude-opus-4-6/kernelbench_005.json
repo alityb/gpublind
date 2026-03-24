@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_005",
+  "model": "claude-opus-4-6",
+  "seen_before": true,
+  "source_guess": "This is a stub/placeholder generated from **KernelBench** (specifically problem 5, AlexNet). The comment explicitly references \"KernelBench candidate 5: 5_AlexNet.\" KernelBench is a known GPU kernel benchmark suite. However, this is just an empty harness/template with no actual kernel implementation \u2014 it contains only a `TODO` placeholder and no real computation.",
+  "raw_response": "SEEN_BEFORE: YES\nSOURCE: This is a stub/placeholder generated from **KernelBench** (specifically problem 5, AlexNet). The comment explicitly references \"KernelBench candidate 5: 5_AlexNet.\" KernelBench is a known GPU kernel benchmark suite. However, this is just an empty harness/template with no actual kernel implementation \u2014 it contains only a `TODO` placeholder and no real computation."
+}

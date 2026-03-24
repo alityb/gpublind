@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbot_shared_00_016",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\n\nSOURCE: UNKNOWN\n\nThis looks like a tiny illustrative CUDA snippet, not something I can confidently tie to a specific benchmark, tutorial, or codebase. It uses a simple shared-memory tile declaration and a minimal write pattern, which is common in many examples, but this exact kernel does not stand out as a known public benchmark or canonical sample."
+}

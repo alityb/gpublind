@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from collections import Counter
 from pathlib import Path
 from typing import Sequence
@@ -18,7 +19,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--register-spill", type=Path, default=Path("data/register_spill_candidates.jsonl"))
     parser.add_argument("--kernels", type=Path, default=Path("kernels"))
     parser.add_argument("--profiles", type=Path, default=Path("profiles"))
+    parser.add_argument("--subset", type=Path, default=None)
     return parser.parse_args(argv)
+
+
+def load_subset_ids(path: Path | None) -> set[str]:
+    if path is None:
+        return set()
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    items = payload.get("kernel_ids", []) if isinstance(payload, dict) else payload
+    return {str(item) for item in items}
 
 
 def is_verified_entry(entry: object) -> bool:
@@ -51,6 +61,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     registry.load_kernelbot(args.kernelbot)
     registry.load_handwritten(args.kernels)
     entries = list(registry)
+    subset_ids = load_subset_ids(args.subset)
+    if subset_ids:
+        entries = [entry for entry in entries if entry.id in subset_ids]
     verified = [entry for entry in entries if is_verified_entry(entry)]
     by_bottleneck = Counter(entry.true_bottleneck for entry in verified)
     by_source = Counter(entry.source for entry in entries)

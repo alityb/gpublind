@@ -1,0 +1,25 @@
+{
+  "kernel_id": "kernelbot_shared_00_000",
+  "model": "claude-opus-4-6",
+  "trial": 1,
+  "level": 3,
+  "question_format": "label",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": null,
+  "predicted_label": "latency-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: The kernel has extremely low achieved occupancy (8.56%) yet shows zero memory stalls, zero DRAM bandwidth utilization, and zero compute intensity, indicating the kernel is too trivially short and launch-overhead-dominated for the GPU to fill its pipelines. With only 64 threads per block performing minimal work (a single shared memory store per thread), the kernel completes before enough warps can be scheduled to hide instruction latency, making it bottlenecked on latency rather than memory or compute resources.",
+  "parsed_reasoning": "The kernel has extremely low achieved occupancy (8.56%) yet shows zero memory stalls, zero DRAM bandwidth utilization, and zero compute intensity, indicating the kernel is too trivially short and launch-overhead-dominated for the GPU to fill its pipelines. With only 64 threads per block performing minimal work (a single shared memory store per thread), the kernel completes before enough warps can be scheduled to hide instruction latency, making it bottlenecked on latency rather than memory or compute resources.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck\nin this CUDA kernel using the full profiler output.\n\nHardware: NVIDIA A10G (peak BW: 0.496 TB/s, peak FLOPS: 30.77 TFLOPS, ridge point: 62 FLOP/byte)\n\nNCU Profile:\n{\n  \"achieved_occupancy_pct\": 8.56,\n  \"arithmetic_intensity_flop_per_byte\": 0.0,\n  \"dram_bandwidth_utilization_pct\": 0.0,\n  \"global_load_efficiency_pct\": 100.0,\n  \"l2_hit_rate_pct\": 100.0,\n  \"register_count_per_thread\": 16,\n  \"ridge_point_flop_per_byte\": 62.07,\n  \"stall_long_scoreboard_pct\": 0.0,\n  \"stall_memory_pct\": 0.0\n}\n\n```cuda\n__global__ void k(float* x){ __shared__ float tile[32][32]; int i = threadIdx.x; tile[i][0] = x[i]; } int main(){ k<<<256, 64>>>(0); }\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T20:48:12.394092+00:00"
+}

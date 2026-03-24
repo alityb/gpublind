@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM correctly identified latency-bound as the bottleneck, cited specific metric values (84.5% long scoreboard stalls, 0.0% DRAM utilization, 77.7% occupancy), correctly dismissed memory bandwidth as the primary cause, and HIGH confidence was appropriate given the correct diagnosis.",
+  "judge_model": "claude-sonnet-4-6"
+}

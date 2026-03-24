@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_138",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/contrived microbenchmark or test kernel. The specific characteristics \u2014 magic constants like 17, 257, 4095 (mask for mod 4096), the arbitrary scaling by 1.1f, and the 8-iteration unrolled loop with peculiar stride patterns \u2014 don't match any well-known benchmark, tutorial, or open-source codebase I can identify. It looks like something hand-crafted to test memory access patterns or serve as a toy example, possibly for evaluating cache behavior or instruction throughput."
+}

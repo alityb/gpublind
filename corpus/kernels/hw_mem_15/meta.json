@@ -1,0 +1,23 @@
+{
+  "id": "hw_mem_15",
+  "source": "handwritten",
+  "true_bottleneck": "memory-bound",
+  "misleading_signal": "hw_mem_15 looks like a mixed access pattern, but the real bottleneck is sustained DRAM traffic on a large working set",
+  "correct_explanation": "the kernel streams hundreds of megabytes with only a handful of FLOPs per element, so bandwidth dominates",
+  "difficulty": "medium",
+  "category": "memory-bound",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "dram bandwidth",
+      "bandwidth",
+      "arithmetic intensity",
+      "global memory"
+    ],
+    "must_not_cite_as_primary": [
+      "dependency chain",
+      "register spill",
+      "occupancy collapse"
+    ]
+  }
+}

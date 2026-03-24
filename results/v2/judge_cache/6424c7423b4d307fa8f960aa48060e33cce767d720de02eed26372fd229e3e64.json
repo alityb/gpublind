@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" instead of the true \"memory-bound\" classification, and compounded this with HIGH confidence, making it an overconfident error that penalizes both STAGE_1 and CONFIDENCE_CALIBRATED; notably, the LLM was misled by the moderate DRAM utilization and incorrectly elevated the Long Scoreboard stall as the primary cause, which is explicitly listed as a must-not-cite-as-primary signal.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

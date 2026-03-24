@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response accurately identifies the bottleneck as occupancy-limited, cites specific metrics (achieved occupancy and DRAM bandwidth), and does not primarily blame any misleading signals.",
+  "judge_model": "openai/gpt-4o-mini"
+}

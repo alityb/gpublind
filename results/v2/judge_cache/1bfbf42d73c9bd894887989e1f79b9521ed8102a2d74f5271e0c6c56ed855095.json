@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM correctly identified register-spill as the bottleneck, cited a specific code pattern (21 scalar float temporaries, only a0/a20 used in final store) as evidence of register pressure, framed local memory as the mechanism rather than the primary cause, and HIGH confidence was appropriate given the correct diagnosis.",
+  "judge_model": "claude-sonnet-4-6"
+}

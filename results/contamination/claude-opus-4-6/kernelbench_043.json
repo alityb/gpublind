@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_043",
+  "model": "claude-opus-4-6",
+  "seen_before": true,
+  "source_guess": "This is from **KernelBench**, specifically task 43 (MinGPT Causal Attention). The comment explicitly references \"KernelBench candidate 43: 43_MinGPTCausalAttention.\" However, the kernel itself is essentially a stub/placeholder with no actual CUDA computation \u2014 it's just a harness template that hasn't been filled in. KernelBench is a known GPU kernel benchmark suite.",
+  "raw_response": "SEEN_BEFORE: YES\nSOURCE: This is from **KernelBench**, specifically task 43 (MinGPT Causal Attention). The comment explicitly references \"KernelBench candidate 43: 43_MinGPTCausalAttention.\" However, the kernel itself is essentially a stub/placeholder with no actual CUDA computation \u2014 it's just a harness template that hasn't been filled in. KernelBench is a known GPU kernel benchmark suite."
+}

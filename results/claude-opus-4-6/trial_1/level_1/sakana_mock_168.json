@@ -1,0 +1,32 @@
+{
+  "kernel_id": "sakana_mock_168",
+  "model": "claude-opus-4-6",
+  "trial": 1,
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": null,
+  "predicted_label": "memory-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: memory-bound\nREASONING: The memory access patterns using `(i * 17) & 4095` and `(i + j * 257) & 4095` create non-coalesced, strided accesses across threads within a warp, severely degrading memory throughput. Although the data fits in a 4096-element (16KB) range that could reside in L1/L2 cache, the irregular stride patterns cause bank conflicts and cache line fragmentation, making memory access the dominant bottleneck. The arithmetic is minimal (a multiply-add per iteration), so the kernel is clearly limited by the inefficient memory access pattern rather than compute.",
+  "parsed_reasoning": "The memory access patterns using `(i * 17) & 4095` and `(i + j * 257) & 4095` create non-coalesced, strided accesses across threads within a warp, severely degrading memory throughput. Although the data fits in a 4096-element (16KB) range that could reside in L1/L2 cache, the irregular stride patterns cause bank conflicts and cache line fragmentation, making memory access the dominant bottleneck. The arithmetic is minimal (a multiply-add per iteration), so the kernel is clearly limited by the inefficient memory access pattern rather than compute.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n__global__ void kernel(float* x, const float* y) { int i = blockIdx.x * blockDim.x + threadIdx.x; float v = y[(i * 17) & 4095]; for (int j = 0; j < 8; ++j) { v = v * 1.1f + x[(i + j * 257) & 4095]; } x[i] = v; }\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T19:24:48.508732+00:00",
+  "judge": {
+    "label_correct": 1,
+    "reasoning_grounded": 1,
+    "mislead_resistant": 1,
+    "explanation": "The model correctly identified memory-bound as the bottleneck, cited specific code patterns (the strided access `i * 17` and `i + j * 257` causing non-coalesced accesses), and correctly dismissed the misleading high arithmetic intensity signal by noting the arithmetic is minimal.",
+    "judge_model": "claude-sonnet-4-6"
+  }
+}

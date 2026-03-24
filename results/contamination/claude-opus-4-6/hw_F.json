@@ -1,0 +1,7 @@
+{
+  "kernel_id": "hw_F",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel is a modified tiled GEMM that has been deliberately altered to serve as a microbenchmark for measuring arithmetic throughput (FLOP/s) or compute-to-memory ratio. The key giveaway is the `REUSE_ITERS = 32` inner loop that artificially repeats computation with a `scale` factor, the use of inline PTX (`counted_mul`, `counted_add`) to prevent compiler optimization/fusion of the redundant arithmetic, and the specific constant `0.0009765625f` (which is 1/1024). This pattern of artificially inflating arithmetic intensity on top of a standard tiled GEMM is characteristic of custom-written roofline model benchmarks or compute throughput tests, but this specific kernel doesn't match any well-known public benchmark or tutorial I can identify."
+}

@@ -1,0 +1,20 @@
+{
+  "id": "hw_E",
+  "source": "handwritten",
+  "true_bottleneck": "latency-bound",
+  "misleading_signal": "the kernel presents a low-AI memory-bound signature, but the more reliable clue is the elevated long-scoreboard stall showing latency pressure rather than a clean throughput bottleneck",
+  "correct_explanation": "long-scoreboard stalls dominate because the kernel spends most of its time waiting on dependent operations rather than saturating bandwidth",
+  "difficulty": "hard",
+  "category": "latency-bound",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "smsp__warp_issue_stalled_long_scoreboard_per_warp_active.pct",
+      "arithmetic_intensity"
+    ],
+    "must_not_cite_as_primary": [
+      "memory_bound=true alone",
+      "streaming FIR access pattern"
+    ]
+  },
+  "hardware": "A10G"
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" rather than \"occupancy-limited\" (the achieved occupancy of 22.61% and small threadblock collapsing occupancy were never cited as the root cause), and its HIGH confidence on an incorrect diagnosis makes it overconfident.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

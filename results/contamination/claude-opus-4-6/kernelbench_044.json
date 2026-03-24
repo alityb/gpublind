@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_044",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis is essentially a placeholder/stub file with no actual CUDA kernel implementation. It references \"KernelBench candidate 44: 44_MiniGPTBlock\" which suggests it was generated as part of the KernelBench benchmark suite, but the kernel itself is just a `TODO` stub that prints a message and does nothing. There is no actual GPU kernel code to recognize here."
+}

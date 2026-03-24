@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies latency-bound as the bottleneck with HIGH confidence, cites specific metric values (84.4% Long Scoreboard stalls, 0.0% DRAM utilization, 76.4% occupancy), and correctly avoids blaming memory bandwidth as the primary cause while using the low DRAM utilization as exculpatory evidence rather than a primary diagnosis.",
+  "judge_model": "claude-sonnet-4-6"
+}

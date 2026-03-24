@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies memory-bound as the bottleneck with HIGH confidence, cites specific metric values (0.12 FLOP/byte arithmetic intensity, 60.5% DRAM BW utilization, 56.5% long scoreboard stalls), correctly frames long scoreboard stalls as a *consequence* of memory-boundedness rather than a primary cause, and appropriately uses the required terminology (arithmetic intensity, DRAM bandwidth utilization) while avoiding the prohibited primary attributions.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The response inaccurately identifies the bottleneck as latency-bound instead of memory-bound, leading to a zero score in STAGE_1.",
+  "judge_model": "openai/gpt-4o-mini"
+}

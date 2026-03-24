@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_19",
+  "model": "claude-opus-4-6",
+  "condition": "C0",
+  "condition_name": "code_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "The kernel reads two float arrays (`a` and `b`) and writes one float array (`out`), totaling 12 bytes of DRAM traffic per element, while performing essentially zero useful FLOPs (the compiler will optimize `a[idx] * 0.0f` and `b[idx] * 0.0f` away, but even if it doesn't, it's only ~4 FLOPs per 12 bytes, yielding an arithmetic intensity of ~0.33 FLOP/byte \u2014 far below the ridge point of 62 FLOP/byte). With n = 2^26 elements and 3 global memory accesses per element, the kernel moves ~768 MB of data through DRAM, making it purely bandwidth-limited. DRAM utilization will be high as the grid-stride loop with 4096\u00d7256 threads saturates the memory subsystem while the compute units remain largely idle.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: The kernel reads two float arrays (`a` and `b`) and writes one float array (`out`), totaling 12 bytes of DRAM traffic per element, while performing essentially zero useful FLOPs (the compiler will optimize `a[idx] * 0.0f` and `b[idx] * 0.0f` away, but even if it doesn't, it's only ~4 FLOPs per 12 bytes, yielding an arithmetic intensity of ~0.33 FLOP/byte \u2014 far below the ridge point of 62 FLOP/byte). With n = 2^26 elements and 3 global memory accesses per element, the kernel moves ~768 MB of data through DRAM, making it purely bandwidth-limited. DRAM utilization will be high as the grid-stride loop with 4096\u00d7256 threads saturates the memory subsystem while the compute units remain largely idle.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel\nrunning on an NVIDIA A10G GPU (ridge point: 62 FLOP/byte).\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void fill_kernel(const float* a, const float* b, float* out, int n) {\n\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    while (idx < n) {\n        out[idx] = 3.0f + a[idx] * 0.0f + b[idx] * 0.0f;\n        idx += stride;\n    }\n\n}\n\nint main() {\n    const int n = 1 << 26;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_a, *d_b, *d_c;\n    cudaMalloc(&d_a, bytes);\n    cudaMalloc(&d_b, bytes);\n    cudaMalloc(&d_c, bytes);\n    cudaMemset(d_a, 1, bytes);\n    cudaMemset(d_b, 2, bytes);\n    cudaMemset(d_c, 0, bytes);\n    fill_kernel<<<4096, 256>>>(d_a, d_b, d_c, n);\n    cudaDeviceSynchronize();\n    fill_kernel<<<4096, 256>>>(d_a, d_b, d_c, n);\n    cudaDeviceSynchronize();\n    float h = 0.0f;\n    cudaMemcpy(&h, d_c, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h);\n    cudaFree(d_a);\n    cudaFree(d_b);\n    cudaFree(d_c);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies the memory-bound bottleneck, cites specific metrics (arithmetic intensity ~0.33 FLOP/byte vs ridge point 62 FLOP/byte, ~768 MB DRAM traffic, 3 global memory accesses per element), and correctly attributes the bottleneck to sustained DRAM bandwidth saturation rather than any misleading signal, with appropriately high confidence.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

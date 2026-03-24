@@ -1,0 +1,32 @@
+{
+  "kernel_id": "kernelbench_032",
+  "model": "claude-opus-4-6",
+  "trial": 1,
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": "multiple large matrix-style operators dominate arithmetic work and likely exceed the roofline ridge point",
+  "predicted_label": "latency-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: This kernel contains no actual GPU computation \u2014 it only calls `cudaDeviceSynchronize()` and `std::puts()`, meaning the entire execution time is dominated by host-side API call latency and the overhead of launching/synchronizing with the CUDA runtime. There are no memory operations, arithmetic instructions, or thread occupancy considerations because no kernel is actually launched. The bottleneck is purely the fixed latency of the CUDA runtime synchronization and host I/O calls.",
+  "parsed_reasoning": "This kernel contains no actual GPU computation \u2014 it only calls `cudaDeviceSynchronize()` and `std::puts()`, meaning the entire execution time is dominated by host-side API call latency and the overhead of launching/synchronizing with the CUDA runtime. There are no memory operations, arithmetic instructions, or thread occupancy considerations because no kernel is actually launched. The bottleneck is purely the fixed latency of the CUDA runtime synchronization and host I/O calls.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n// KernelBench candidate 32: 32_ConvolutionalVisionTransformer\nint main() {\n  // Standalone profiling harness template generated from KernelBench PyTorch reference.\n  // TODO: materialize Q/K/V tensors and call a fused attention kernel.\n  cudaDeviceSynchronize();\n  std::puts(\"TODO: fill in generated harness before profiling.\");\n  return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T19:04:12.372732+00:00",
+  "judge": {
+    "label_correct": 0,
+    "reasoning_grounded": 1,
+    "mislead_resistant": 1,
+    "explanation": "The model correctly identified that no GPU kernel is actually launched and cited specific code evidence (cudaDeviceSynchronize and std::puts), but labeled the bottleneck as \"latency-bound\" rather than the true label of \"occupancy-limited.\"",
+    "judge_model": "claude-sonnet-4-6"
+  }
+}

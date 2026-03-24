@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_174",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/toy microbenchmark, likely hand-crafted to test specific memory access patterns (the `& 4095` masking to keep accesses within a 4096-element range, the stride of 17 and 257 to create non-trivial access patterns). It doesn't match any known benchmark suite (e.g., Rodinia, Parboil, SHOC) or standard tutorial. The specific constants (17, 257, 4095, 8, 1.1f) and the particular combination of strided reads with a small accumulation loop look like something someone wrote to experiment with cache behavior or memory coalescing effects, not something from a published source."
+}

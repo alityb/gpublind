@@ -10,7 +10,7 @@ from typing import Any, Sequence
 
 import pandas as pd
 
-from eval.baselines import frequency_baseline, random_baseline, roofline_baseline
+from eval.baselines import frequency_baseline, random_baseline, roofline_baseline, roofline_plus_baseline
 from registry import KernelRegistry
 
 
@@ -26,6 +26,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--profiles", type=Path, default=Path("profiles"))
     parser.add_argument("--include-formats", action="store_true")
     parser.add_argument("--min-confidence", choices=["high", "medium", "any"], default="medium")
+    parser.add_argument("--subset", type=Path, default=None)
     return parser.parse_args(argv)
 
 
@@ -59,6 +60,8 @@ def infer_result_metadata(path: Path, results_dir: Path) -> dict[str, Any]:
 def load_results(results_dir: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for path in sorted(results_dir.rglob("*.json")):
+        if "contamination" in path.relative_to(results_dir).parts:
+            continue
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except FileNotFoundError:
@@ -73,6 +76,17 @@ def load_results(results_dir: Path) -> list[dict[str, Any]]:
             for key, value in metadata.items():
                 payload.setdefault(key, value)
             rows.append(payload)
+    return rows
+
+
+def load_contamination_results(results_dir: Path) -> list[dict[str, Any]]:
+    contamination_dir = results_dir / "contamination"
+    rows: list[dict[str, Any]] = []
+    if not contamination_dir.exists():
+        return rows
+    for path in sorted(contamination_dir.rglob("*.json")):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        rows.append(payload)
     return rows
 
 
@@ -94,6 +108,14 @@ def load_registry(
     registry.load_kernelbot(kernelbot)
     registry.load_handwritten(kernels)
     return registry
+
+
+def load_subset_ids(path: Path | None) -> set[str]:
+    if path is None:
+        return set()
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    items = payload.get("kernel_ids", []) if isinstance(payload, dict) else payload
+    return {str(item) for item in items}
 
 
 def latest_per_combo(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -239,6 +261,14 @@ def accuracy_table(df: pd.DataFrame, registry: KernelRegistry) -> pd.DataFrame:
         lower, upper = wilson_interval(int(round(accuracy * total)), total)
         roofline_row[f"L{level}"] = format_ci_value(accuracy, lower, upper)
     rows.append(roofline_row)
+    roofline_plus = roofline_plus_baseline(list(registry))
+    roofline_plus_row = {"Model": "Roofline+"}
+    for level in range(1, 6):
+        total = max(len(list(registry)), 1)
+        accuracy = float(roofline_plus["accuracy"])
+        lower, upper = wilson_interval(int(round(accuracy * total)), total)
+        roofline_plus_row[f"L{level}"] = format_ci_value(accuracy, lower, upper)
+    rows.append(roofline_plus_row)
     return pd.DataFrame(rows)
 
 
@@ -345,6 +375,42 @@ def write_reasoning_quality(df: pd.DataFrame, output_path: Path) -> pd.DataFrame
     return table
 
 
+def write_judge_reasoning_quality(df: pd.DataFrame, output_path: Path) -> pd.DataFrame:
+    rows: list[dict[str, Any]] = []
+    for model in sorted(df["model"].unique()) if not df.empty else []:
+        subset = df[df["model"] == model]
+        judge_rows = subset[subset["judge"].notna()] if "judge" in subset.columns else subset.iloc[0:0]
+        if judge_rows.empty:
+            rows.append(
+                {
+                    "Model": model,
+                    "Judge N": 0,
+                    "Grounded %": 0.0,
+                    "Mislead Resistant %": 0.0,
+                    "Correct Label, Wrong Reasoning %": 0.0,
+                }
+            )
+            continue
+        label_correct = judge_rows["judge"].apply(lambda item: int(dict(item).get("label_correct", 0)))
+        grounded = judge_rows["judge"].apply(lambda item: int(dict(item).get("reasoning_grounded", 0)))
+        resistant = judge_rows["judge"].apply(lambda item: int(dict(item).get("mislead_resistant", 0)))
+        lucky = judge_rows["judge"].apply(
+            lambda item: int(dict(item).get("label_correct", 0) == 1 and (dict(item).get("reasoning_grounded", 0) == 0 or dict(item).get("mislead_resistant", 0) == 0))
+        )
+        rows.append(
+            {
+                "Model": model,
+                "Judge N": len(judge_rows),
+                "Grounded %": round(100.0 * float(grounded.mean()), 2),
+                "Mislead Resistant %": round(100.0 * float(resistant.mean()), 2),
+                "Correct Label, Wrong Reasoning %": round(100.0 * float(lucky.mean()), 2),
+            }
+        )
+    table = pd.DataFrame(rows)
+    output_path.write_text(frame_to_markdown(table) + "\n", encoding="utf-8")
+    return table
+
+
 def automatic_grounded_reasoning(row: dict[str, Any], registry: KernelRegistry) -> bool | None:
     kernel_id = str(row.get("kernel_id", ""))
     if not kernel_id:
@@ -393,6 +459,84 @@ def write_groundedness(df: pd.DataFrame, registry: KernelRegistry, output_path: 
     return table
 
 
+def write_contamination_report(label_df: pd.DataFrame, contamination_rows: list[dict[str, Any]], output_path: Path) -> pd.DataFrame:
+    if not contamination_rows:
+        table = pd.DataFrame(columns=["Model", "Flagged %", "Accuracy Seen Before", "Accuracy Unseen"])
+        output_path.write_text(frame_to_markdown(table) + "\n", encoding="utf-8")
+        return table
+    contamination_df = pd.DataFrame(contamination_rows)
+    contamination_df["seen_before"] = contamination_df["seen_before"].astype(bool)
+    merged = label_df.merge(contamination_df[["model", "kernel_id", "seen_before"]], on=["model", "kernel_id"], how="left")
+    rows: list[dict[str, Any]] = []
+    for model in sorted(merged["model"].unique()) if not merged.empty else []:
+        subset = merged[merged["model"] == model]
+        flagged = subset["seen_before"].fillna(False).astype(bool)
+        seen_subset = subset[flagged]
+        unseen_subset = subset[~flagged]
+        rows.append(
+            {
+                "Model": model,
+                "Flagged %": round(100.0 * float(flagged.mean()), 2),
+                "Accuracy Seen Before": round(100.0 * float(seen_subset["correct"].mean()), 2) if not seen_subset.empty else 0.0,
+                "Accuracy Unseen": round(100.0 * float(unseen_subset["correct"].mean()), 2) if not unseen_subset.empty else 0.0,
+            }
+        )
+    table = pd.DataFrame(rows)
+    output_path.write_text(frame_to_markdown(table) + "\n", encoding="utf-8")
+    return table
+
+
+def write_difficulty_calibration(label_df: pd.DataFrame, registry: KernelRegistry, output_path: Path) -> pd.DataFrame:
+    if label_df.empty:
+        table = pd.DataFrame(columns=["Difficulty", "N kernels"])
+        output_path.write_text(frame_to_markdown(table) + "\n", encoding="utf-8")
+        return table
+    difficulty_lookup = {entry.id: entry.difficulty for entry in registry}
+    enriched = label_df.copy()
+    enriched["Difficulty"] = enriched["kernel_id"].map(difficulty_lookup).fillna("unknown")
+    kernel_counts = enriched.groupby("Difficulty")["kernel_id"].nunique().to_dict()
+    rows: list[dict[str, Any]] = []
+    for difficulty in sorted(enriched["Difficulty"].unique()):
+        row: dict[str, Any] = {"Difficulty": difficulty, "N kernels": kernel_counts.get(difficulty, 0)}
+        subset = enriched[enriched["Difficulty"] == difficulty]
+        for model in sorted(enriched["model"].unique()):
+            model_subset = subset[subset["model"] == model]
+            row[f"{model} accuracy"] = round(100.0 * float(model_subset["correct"].mean()), 2) if not model_subset.empty else 0.0
+        rows.append(row)
+    table = pd.DataFrame(rows)
+    output_path.write_text(frame_to_markdown(table) + "\n", encoding="utf-8")
+    return table
+
+
+def write_per_class_accuracy(label_df: pd.DataFrame, registry: KernelRegistry, output_path: Path) -> pd.DataFrame:
+    if label_df.empty:
+        table = pd.DataFrame(columns=["Model"])
+        output_path.write_text(frame_to_markdown(table) + "\n", encoding="utf-8")
+        return table
+    bottleneck_lookup = {entry.id: entry.true_bottleneck for entry in registry}
+    enriched = label_df.copy()
+    enriched["true_bottleneck"] = enriched["kernel_id"].map(bottleneck_lookup).fillna(enriched["true_bottleneck"])
+    rows: list[dict[str, Any]] = []
+    ordered_labels = [
+        "memory-bound",
+        "latency-bound",
+        "compute-bound",
+        "occupancy-limited",
+        "register-spill",
+    ]
+    for (model, level), subset in enriched.groupby(["model", "level"], dropna=False):
+        row: dict[str, Any] = {"Model": f"{model} L{int(level)}"}
+        for label in ordered_labels:
+            label_subset = subset[subset["true_bottleneck"] == label]
+            total = len(label_subset)
+            accuracy = float(label_subset["correct"].mean()) if total else 0.0
+            row[label] = f"{accuracy * 100.0:.1f}% ({total})"
+        rows.append(row)
+    table = pd.DataFrame(rows)
+    output_path.write_text(frame_to_markdown(table) + "\n", encoding="utf-8")
+    return table
+
+
 def write_summary(df: pd.DataFrame, output_path: Path, consistency_table: pd.DataFrame | None = None) -> None:
     if df.empty:
         output_path.write_text("No results available.\n", encoding="utf-8")
@@ -426,6 +570,7 @@ def write_summary(df: pd.DataFrame, output_path: Path, consistency_table: pd.Dat
         "- Results with CI width > 30pp are flagged as underpowered.\n"
         "- Minimum recommended corpus size for 20pp CI: 96 kernels.\n"
         "- Groundedness reports correct answers whose reasoning cites expected profiler evidence and avoids the primary red herring.\n"
+        "- Judge-based reasoning quality scores are produced by an auxiliary LLM judge when available.\n"
     )
     if consistency_table is not None and not consistency_table.empty:
         summary += "\nConsistency Scores\n\n" + frame_to_markdown(consistency_table) + "\n"
@@ -458,6 +603,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.min_confidence,
     )
     filtered_entries = registry.filter(confidence=args.min_confidence)
+    subset_ids = load_subset_ids(args.subset)
+    if subset_ids:
+        filtered_entries = [entry for entry in filtered_entries if entry.id in subset_ids]
     allowed_ids = {entry.id for entry in filtered_entries}
     rows = latest_per_combo(load_results(args.results))
     df = pd.DataFrame(rows)
@@ -480,6 +628,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     category_breakdown = write_category_breakdown(label_df, filtered_entries, args.results / "category_breakdown.md")
     reasoning_quality = write_reasoning_quality(label_df, args.results / "reasoning_quality.md")
     groundedness = write_groundedness(label_df, registry, args.results / "groundedness_table.md")
+    judge_reasoning_quality = write_judge_reasoning_quality(label_df, args.results / "reasoning_quality_table.md")
+    contamination_rows = load_contamination_results(args.results)
+    contamination_table = write_contamination_report(label_df, contamination_rows, args.results / "contamination_table.md")
+    difficulty_calibration = write_difficulty_calibration(label_df, filtered_entries, args.results / "difficulty_calibration_table.md")
+    per_class_accuracy = write_per_class_accuracy(label_df, filtered_entries, args.results / "per_class_accuracy.md")
     consistency_detail = pd.DataFrame()
     consistency_summary = pd.DataFrame()
     if args.include_formats and not df.empty:
@@ -494,7 +647,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             "sycophancy": sycophancy,
             "category_breakdown": category_breakdown,
             "reasoning_quality": reasoning_quality,
+            "reasoning_quality_table": judge_reasoning_quality,
             "groundedness": groundedness,
+            "contamination": contamination_table,
+            "difficulty_calibration": difficulty_calibration,
+            "per_class_accuracy": per_class_accuracy,
             "consistency_scores": consistency_summary,
             "consistency_detail": consistency_detail,
         },

@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_036",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\n\nSOURCE: UNKNOWN\n\nThis looks like a small synthetic/stress-test style CUDA kernel using arbitrary constants and wraparound indexing to create mixed memory-access and arithmetic behavior. I don\u2019t recognize it as a standard kernel from a well-known benchmark, tutorial, or common codebase, and I can\u2019t confidently link it to a specific source."
+}

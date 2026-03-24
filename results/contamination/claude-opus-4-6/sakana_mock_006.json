@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_006",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/contrived microbenchmark rather than something from a well-known codebase or tutorial. The specific characteristics \u2014 the arbitrary magic numbers (17, 4095, 257, 8 iterations, 1.1f multiplier), the bitwise AND masking for index wrapping, and the simple accumulation loop \u2014 suggest it was hand-written to test or demonstrate specific GPU behavior (e.g., memory access patterns, instruction-level parallelism, or cache effects). It doesn't match any known benchmark suite (Rodinia, Parboil, SHOC, etc.) or standard CUDA tutorial code that I'm aware of."
+}

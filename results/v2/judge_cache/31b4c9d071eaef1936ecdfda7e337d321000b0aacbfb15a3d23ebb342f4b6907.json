@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy as the bottleneck with HIGH confidence, cites specific metric values (48 KB shared memory, 2 blocks per SM, 16/48 warps, ~33% occupancy matching the measured 32.52%), and correctly attributes the cause to shared-memory-constrained launch geometry rather than the misleading compute-heavy or bandwidth signals.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

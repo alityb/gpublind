@@ -1,0 +1,21 @@
+{
+  "id": "kernelbot_stride_02_022",
+  "source": "kernelbot",
+  "true_bottleneck": "memory-bound",
+  "misleading_signal": "non-power-of-2 stride causes cache line waste - may look compute-bound if FLOP count is high",
+  "correct_explanation": "non-power-of-2 stride causes cache line waste - may look compute-bound if FLOP count is high",
+  "difficulty": "medium",
+  "category": "memory-bound",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "dram_bw",
+      "global load efficiency",
+      "cache miss"
+    ],
+    "must_not_cite_as_primary": [
+      "FLOP count",
+      "arithmetic ops"
+    ]
+  },
+  "hardware": "A10G"
+}

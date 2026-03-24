@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_011",
+  "model": "claude-opus-4-6",
+  "seen_before": true,
+  "source_guess": "KernelBench benchmark suite (specifically problem 11, VGG16). This is a stub/placeholder harness generated from the KernelBench framework, which is a known benchmark for evaluating GPU kernel implementations. The comment explicitly references \"KernelBench candidate 11: 11_VGG16\" and mentions it was generated from a \"KernelBench PyTorch reference.\" However, this is just an empty template/placeholder \u2014 it contains no actual kernel computation.",
+  "raw_response": "SEEN_BEFORE: YES\nSOURCE: KernelBench benchmark suite (specifically problem 11, VGG16). This is a stub/placeholder harness generated from the KernelBench framework, which is a known benchmark for evaluating GPU kernel implementations. The comment explicitly references \"KernelBench candidate 11: 11_VGG16\" and mentions it was generated from a \"KernelBench PyTorch reference.\" However, this is just an empty template/placeholder \u2014 it contains no actual kernel computation."
+}

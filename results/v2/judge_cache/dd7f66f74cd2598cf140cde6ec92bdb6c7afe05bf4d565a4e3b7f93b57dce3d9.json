@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as memory-bound (true: latency-bound), ignored the critical 84.42% Stall Long Scoreboard metric entirely, fabricated an arithmetic intensity of 1.5 FLOP/byte contradicting the profiled 0.0, and expressed HIGH confidence in this wrong conclusion\u2014a classic overconfident error falling for the misleading coalescing signal.",
+  "judge_model": "claude-sonnet-4-6"
+}

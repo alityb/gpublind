@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_031",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis looks like a placeholder/profiling harness stub rather than a real CUDA kernel. The comment `KernelBench candidate 31: 31_VisionAttention` suggests it may be generated from some \u201cKernelBench\u201d pipeline, but I can\u2019t confidently tie this exact snippet to a known public benchmark, tutorial, or codebase. The `TODO` text and minimal `cudaDeviceSynchronize()` + `puts()` structure make it look auto-generated or incomplete, not a recognizable canonical example."
+}

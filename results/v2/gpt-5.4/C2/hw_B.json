@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_B",
+  "model": "gpt-5.4",
+  "condition": "C2",
+  "condition_name": "code_plus_metrics",
+  "true_bottleneck": "latency-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "Arithmetic intensity is low (1.25 FLOP/byte), but this is not memory-bandwidth-bound because DRAM utilization is 0.0% of peak and global load efficiency is 100% with a 100% L2 hit rate. The dominant stall is Long Scoreboard at 57.1% of active cycles, which matches waiting on dependent instruction/data readiness in the kernel\u2019s serial chain of floating-point operations and divisions; occupancy is adequate at 74.2% and register usage is low at 16, so neither occupancy nor spilling is the primary limiter.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: Arithmetic intensity is low (1.25 FLOP/byte), but this is not memory-bandwidth-bound because DRAM utilization is 0.0% of peak and global load efficiency is 100% with a 100% L2 hit rate. The dominant stall is Long Scoreboard at 57.1% of active cycles, which matches waiting on dependent instruction/data readiness in the kernel\u2019s serial chain of floating-point operations and divisions; occupancy is adequate at 74.2% and register usage is low at 16, so neither occupancy nor spilling is the primary limiter.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel.\n\nHardware performance counters (NVIDIA A10G):\nArithmetic Intensity: 1.25 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 74.2%\nDRAM Bandwidth Utilization: 0.0% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 57.1% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 16\n\nSource code:\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void feature_transform(const float* in, float* out, int n) {\n    int tid = blockIdx.x * blockDim.x + threadIdx.x;\n    if (tid >= n) {\n        return;\n    }\n\n    float sample = in[tid];\n    float centered = sample - 0.125f;\n    float energy = centered * centered + 0.03125f;\n    float scaled = energy * 1.125f + 0.5f;\n    float normalized = centered / (scaled + 0.25f);\n    float corrected = normalized * (1.0f + scaled * 0.0625f);\n    float damped = corrected / (1.0f + corrected * corrected * 0.5f);\n    float fused = damped * 1.03125f + scaled * 0.015625f;\n    float refined = fused / (1.0f + fused * 0.25f);\n    out[tid] = refined;\n}\n\nint main() {\n    const int n = 1 << 20;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float* h = new float[n];\n    float *in, *out;\n    cudaMalloc(&in, bytes);\n    cudaMalloc(&out, bytes);\n    for (int i = 0; i < n; ++i) {\n        h[i] = static_cast<float>(i % 97) * 0.03125f;\n    }\n    cudaMemcpy(in, h, bytes, cudaMemcpyHostToDevice);\n    feature_transform<<<(n + 255) / 256, 256>>>(in, out, n);\n    cudaMemcpy(h, out, bytes, cudaMemcpyDeviceToHost);\n    std::printf(\"%f\\n\", h[1]);\n    cudaFree(in);\n    cudaFree(out);\n    delete[] h;\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response accurately identifies the bottleneck as latency-bound, cites specific metrics such as long scoreboard stalls to support its reasoning, and does not misattribute the cause to misleading signals regarding memory access patterns.",
+    "judge_model": "openai/gpt-4o-mini"
+  }
+}

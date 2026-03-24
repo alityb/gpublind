@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies latency-bound as the bottleneck with high confidence, cites specific metric values (84.5% stall long scoreboard, 0.0% DRAM BW utilization, 76.5% occupancy), and correctly attributes the root cause to L2 cache access latency rather than the misleading poor-coalescing/memory-bandwidth signal.",
+  "judge_model": "claude-sonnet-4-6"
+}

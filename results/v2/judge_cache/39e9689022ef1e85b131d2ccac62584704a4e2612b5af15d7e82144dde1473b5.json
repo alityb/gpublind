@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" rather than \"memory-bound,\" but appropriately expressed LOW confidence given all metrics were unavailable (-1), earning the calibration point for not being overconfident on an incorrect answer.",
+  "judge_model": "claude-sonnet-4-6"
+}

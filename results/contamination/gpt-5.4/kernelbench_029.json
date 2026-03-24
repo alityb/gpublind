@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_029",
+  "model": "gpt-5.4",
+  "seen_before": true,
+  "source_guess": "KernelBench / generated profiling harness stub for `29_SwinMLP`",
+  "raw_response": "SEEN_BEFORE: YES\n\nSOURCE: KernelBench / generated profiling harness stub for `29_SwinMLP`\n\nThe comment explicitly says `KernelBench candidate 29: 29_SwinMLP` and the code looks like a minimal auto-generated placeholder harness rather than a real CUDA kernel. This strongly suggests it comes from the KernelBench benchmark/code generation pipeline, not a standard CUDA tutorial."
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly diagnosed the bottleneck as memory-bound (the true bottleneck is latency-bound due to 84.08% stall_long_scoreboard stalls), and did so with HIGH confidence while ignoring the dominant metric entirely and fabricating FLOP counts not present in the profiling data.",
+  "judge_model": "claude-sonnet-4-6"
+}

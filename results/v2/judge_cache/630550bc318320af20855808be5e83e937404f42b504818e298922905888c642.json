@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM correctly identified the latency-bound bottleneck with high confidence, cited specific metric values (84.4% stall long scoreboard, 0.0% DRAM BW utilization, 77.7% occupancy), and correctly avoided blaming bandwidth/global memory as the primary cause while properly attributing the bottleneck to instruction/data latency stalls.",
+  "judge_model": "claude-sonnet-4-6"
+}

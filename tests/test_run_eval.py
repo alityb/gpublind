@@ -18,6 +18,8 @@ from eval.run_eval import (
     score_prediction,
     wrong_label_for,
 )
+from eval.judge import parse_judge_response
+from eval.contamination_test import parse_contamination_response
 from profiles.generate_profiles import write_mock_fixtures
 from registry.kernel_entry import SEVERITY
 
@@ -65,6 +67,21 @@ def test_parse_assessment_extracts_agreement() -> None:
 
 def test_parse_question_formats_supports_multiple_variants() -> None:
     assert parse_question_formats("label,yesno_memory,rank") == ["label", "yesno_memory", "rank"]
+
+
+def test_parse_judge_response_extracts_scores() -> None:
+    parsed = parse_judge_response(
+        "LABEL_CORRECT: 1\nREASONING_GROUNDED: 0\nMISLEAD_RESISTANT: 1\nEXPLANATION: concise."
+    )
+    assert parsed["label_correct"] == 1
+    assert parsed["reasoning_grounded"] == 0
+    assert parsed["mislead_resistant"] == 1
+
+
+def test_parse_contamination_response_extracts_seen_and_source() -> None:
+    parsed = parse_contamination_response("SEEN_BEFORE: YES\nSOURCE: KernelBench")
+    assert parsed["seen_before"] is True
+    assert parsed["source_guess"] == "KernelBench"
 
 
 def test_scoring_logic_uses_severity_matrix() -> None:
@@ -249,3 +266,38 @@ def test_run_eval_writes_nested_results_for_multiple_question_formats(tmp_path: 
     sample = json.loads((output_dir / "gpt-5.4" / "trial_1" / "level_1" / "rank" / "hw_A.json").read_text(encoding="utf-8"))
     assert sample["question_format"] == "rank"
     assert sample["parsed_ranking"][0] == sample["true_bottleneck"]
+
+
+def test_run_eval_with_judge_writes_judge_scores(tmp_path: Path) -> None:
+    profiles_dir = tmp_path / "profiles"
+    output_dir = tmp_path / "results"
+    write_mock_fixtures(profiles_dir)
+
+    exit_code = main(
+        [
+            "--model",
+            "gpt-5.4",
+            "--mock-profiles",
+            "--mock-llm",
+            "--judge",
+            "--levels",
+            "1",
+            "--filter",
+            "source=handwritten",
+            "--question-formats",
+            "label",
+            "--min-confidence",
+            "any",
+            "--kernels",
+            "kernels",
+            "--profiles",
+            str(profiles_dir),
+            "--output",
+            str(output_dir),
+        ]
+    )
+
+    assert exit_code == 0
+    sample = json.loads((output_dir / "gpt-5.4" / "trial_1" / "level_1" / "hw_A.json").read_text(encoding="utf-8"))
+    assert "judge" in sample
+    assert set(sample["judge"]) >= {"label_correct", "reasoning_grounded", "mislead_resistant", "judge_model"}

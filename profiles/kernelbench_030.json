@@ -1,0 +1,37 @@
+{
+  "arithmetic_intensity": 0.0,
+  "memory_bound": true,
+  "compute_bound": false,
+  "dominant_stall_type": "occupancy_collapse",
+  "global_load_efficiency": 1.0,
+  "achieved_occupancy": 0.0,
+  "stall_long_sb_pct": 0.0,
+  "stall_mem_pct": 0.0,
+  "register_count": 64,
+  "l2_hit_rate": 1.0,
+  "dram_bw_utilization": 2.0174021106060883e-12,
+  "raw": {
+    "ridge_point": 62.07499288865756,
+    "roof": {
+      "gpu_name": "NVIDIA A10G",
+      "peak_bw_tbps": 0.495687,
+      "peak_flops_tflops": 30.769767,
+      "measured": true
+    },
+    "ground_truth_verified": true,
+    "verification": {
+      "roofline": "occupancy-limited",
+      "bandwidth": "occupancy-limited",
+      "stall": "occupancy-limited",
+      "consensus": "occupancy-limited",
+      "confidence": "high"
+    }
+  },
+  "verification": {
+    "roofline": "occupancy-limited",
+    "bandwidth": "occupancy-limited",
+    "stall": "occupancy-limited",
+    "consensus": "occupancy-limited",
+    "confidence": "high"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies register-spill as the bottleneck with HIGH confidence, cites specific metric values (255 registers, 108% DRAM utilization, 89.8% long scoreboard stalls, 15.6% occupancy, specific array sizes), and correctly attributes DRAM saturation as a *symptom* of local memory spills rather than the primary cause, avoiding the misleading signal trap.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

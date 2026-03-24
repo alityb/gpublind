@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_045",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis looks like a placeholder/generated CUDA harness stub, not a distinctive kernel implementation. The comment `KernelBench candidate 45: 45_Gemm_Sigmoid_LogSumExp` suggests it may be from something called KernelBench or an internal/generated benchmark artifact, but the code itself is just a minimal profiling template with no actual GEMM kernel logic. I can\u2019t confidently tie it to a specific well-known public benchmark, tutorial, or codebase."
+}

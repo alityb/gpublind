@@ -44,6 +44,13 @@ class KernelRegistry:
                 if not line:
                     continue
                 entry = kernel_entry_from_dict(json.loads(line))
+                profile_path = self.profile_dir / f"{entry.id}.json"
+                if profile_path.exists():
+                    profile_data = json.loads(profile_path.read_text(encoding="utf-8"))
+                    entry.ncu_profile = ncu_profile_from_dict(profile_data)
+                    consensus = str((entry.ncu_profile.verification or {}).get("consensus", "ambiguous"))
+                    if consensus != "ambiguous":
+                        entry.true_bottleneck = consensus
                 self._entries[entry.id] = entry
 
     def load_mined(self, jsonl_path: Path) -> None:
@@ -85,6 +92,7 @@ class KernelRegistry:
                 reasoning_rubric=dict(meta["reasoning_rubric"]) if isinstance(meta.get("reasoning_rubric"), dict) else None,
                 ncu_profile=profile,
                 task_id=None,
+                contamination_flag=meta.get("contamination_flag"),
             )
             self._entries[entry.id] = entry
 

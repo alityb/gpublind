@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the bottleneck as register-spill, provides specific reasoning related to register pressure and local memory usage while not blaming the misleading signal, leading to high confidence being appropriately assigned for a correct diagnosis.",
+  "judge_model": "openai/gpt-4o-mini"
+}

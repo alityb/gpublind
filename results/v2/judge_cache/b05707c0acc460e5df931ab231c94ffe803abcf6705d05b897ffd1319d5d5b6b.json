@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies latency-bound as the bottleneck, cites specific metric values (84.1% long scoreboard stalls, 0.0% DRAM utilization, 76.2% occupancy), and correctly dismisses memory bandwidth as the primary cause while attributing stalls to data dependency latency rather than throughput saturation.",
+  "judge_model": "claude-sonnet-4-6"
+}

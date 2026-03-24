@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The diagnosis of being latency-bound is incorrect, as the true bottleneck is memory-bound due to the low arithmetic intensity and DRAM bandwidth utilization; therefore, the scoring stages do not proceed.",
+  "judge_model": "openai/gpt-4o-mini"
+}

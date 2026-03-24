@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_17",
+  "model": "claude-opus-4-6",
+  "condition": "C0",
+  "condition_name": "code_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "latency-bound",
+  "confidence": "HIGH",
+  "reasoning": "The kernel computes a pseudo-random `token` index per thread using `b[idx]` and arithmetic, then reads `a[base + ...]` where `base` varies wildly across threads in a warp. This means the load from array `a` produces scattered, non-coalesced global memory accesses \u2014 each warp likely touches up to 32 distinct cache lines for that single load. The arithmetic intensity is extremely low (~1 FLOP per 12 bytes loaded/stored), far below the ridge point of 62 FLOP/byte, but the random access pattern means DRAM bandwidth cannot be saturated either; instead, threads stall on long-latency uncoalesced loads waiting for data from many distinct cache lines. This manifests as high long scoreboard stalls with low DRAM utilization, which is the signature of a latency-bound (rather than memory-bandwidth-bound) kernel.",
+  "correct": false,
+  "raw_response": "BOTTLENECK: latency-bound\nCONFIDENCE: HIGH\nREASONING: The kernel computes a pseudo-random `token` index per thread using `b[idx]` and arithmetic, then reads `a[base + ...]` where `base` varies wildly across threads in a warp. This means the load from array `a` produces scattered, non-coalesced global memory accesses \u2014 each warp likely touches up to 32 distinct cache lines for that single load. The arithmetic intensity is extremely low (~1 FLOP per 12 bytes loaded/stored), far below the ridge point of 62 FLOP/byte, but the random access pattern means DRAM bandwidth cannot be saturated either; instead, threads stall on long-latency uncoalesced loads waiting for data from many distinct cache lines. This manifests as high long scoreboard stalls with low DRAM utilization, which is the signature of a latency-bound (rather than memory-bandwidth-bound) kernel.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the primary performance bottleneck in this CUDA kernel\nrunning on an NVIDIA A10G GPU (ridge point: 62 FLOP/byte).\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n__global__ void embedding_kernel(const float* a, const float* b, float* out, int n) {\n\n    int idx = blockIdx.x * blockDim.x + threadIdx.x;\n    int stride = blockDim.x * gridDim.x;\n    const int table_width = 128;\n    while (idx < n - table_width) {\n        int token = ((int)b[idx] + idx * 17) & ((n / table_width) - 1);\n        int base = token * table_width;\n        out[idx] = a[base + (idx & (table_width - 1))];\n        idx += stride;\n    }\n\n}\n\nint main() {\n    const int n = 1 << 26;\n    const size_t bytes = static_cast<size_t>(n) * sizeof(float);\n    float *d_a, *d_b, *d_c;\n    cudaMalloc(&d_a, bytes);\n    cudaMalloc(&d_b, bytes);\n    cudaMalloc(&d_c, bytes);\n    cudaMemset(d_a, 1, bytes);\n    cudaMemset(d_b, 2, bytes);\n    cudaMemset(d_c, 0, bytes);\n    embedding_kernel<<<4096, 256>>>(d_a, d_b, d_c, n);\n    cudaDeviceSynchronize();\n    embedding_kernel<<<4096, 256>>>(d_a, d_b, d_c, n);\n    cudaDeviceSynchronize();\n    float h = 0.0f;\n    cudaMemcpy(&h, d_c, sizeof(float), cudaMemcpyDeviceToHost);\n    printf(\"%f\\n\", h);\n    cudaFree(d_a);\n    cudaFree(d_b);\n    cudaFree(d_c);\n    return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 0,
+    "stage_2_rvr": null,
+    "stage_3_mpr": null,
+    "confidence_calibrated": 0,
+    "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" instead of the true \"memory-bound\" (sustained DRAM bandwidth) bottleneck, and compounded the error by expressing HIGH confidence in its wrong diagnosis, making it an overconfident failure.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

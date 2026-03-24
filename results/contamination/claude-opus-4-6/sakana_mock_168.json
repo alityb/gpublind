@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_168",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/toy benchmark kernel, likely hand-crafted to test specific memory access patterns (the `& 4095` masking creates wrapping within a 4096-element buffer, and the `* 17` and `* 257` strides create non-sequential access patterns). The specific combination of constants (17, 257, 4095, 8 iterations, 1.1f multiplier) doesn't match any known benchmark, tutorial, or public codebase I'm aware of. It looks like something someone wrote to experiment with memory access patterns, cache behavior, or microbenchmarking."
+}

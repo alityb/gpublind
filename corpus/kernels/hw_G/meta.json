@@ -1,0 +1,21 @@
+{
+  "id": "hw_G",
+  "source": "handwritten",
+  "true_bottleneck": "occupancy-limited",
+  "misleading_signal": "the arithmetic loop looks compute-heavy, but the real limiter is that only one block can reside per SM",
+  "correct_explanation": "a near-maximum shared-memory allocation collapses active blocks per SM and prevents enough warps from running to hide latency",
+  "difficulty": "easy",
+  "category": "occupancy-limited",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "achieved occupancy",
+      "shared memory allocation",
+      "verification confidence"
+    ],
+    "must_not_cite_as_primary": [
+      "inner-loop arithmetic count",
+      "shared memory as a generic optimization"
+    ]
+  },
+  "hardware": "A10G"
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy-limited as the bottleneck, cites specific metric values (22.6% occupancy, 0.00 FLOP/byte, 0% DRAM utilization, 100% L2 hit rate), correctly avoids blaming global memory or bandwidth as primary causes, and the HIGH confidence is justified given the correct diagnosis.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

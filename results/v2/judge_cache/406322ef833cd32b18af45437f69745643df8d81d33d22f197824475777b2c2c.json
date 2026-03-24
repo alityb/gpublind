@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM misidentified the bottleneck as \"latency-bound\" rather than \"occupancy-limited\" and did so with HIGH confidence, making it both wrong on the diagnosis and overconfident, failing to cite occupancy or blocks per SM as the primary issue while incorrectly emphasizing instruction/scoreboard latency despite zero stall metrics.",
+  "judge_model": "claude-sonnet-4-6"
+}

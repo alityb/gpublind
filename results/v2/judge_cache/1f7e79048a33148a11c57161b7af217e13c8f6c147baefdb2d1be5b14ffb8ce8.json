@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies the memory-bound bottleneck with high confidence, cites specific metric values (110% DRAM BW, 0.00 FLOP/byte arithmetic intensity, 98.9% long scoreboard stalls), correctly attributes the stall signal as a symptom of memory saturation rather than a primary cause, and avoids elevating dependency chains, register spills, or occupancy collapse as primary culprits.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

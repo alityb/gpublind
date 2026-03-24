@@ -1,0 +1,25 @@
+{
+  "id": "hw_mem_07",
+  "source": "handwritten",
+  "true_bottleneck": "memory-bound",
+  "difficulty": "easy",
+  "category": "memory-bound",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "dram bandwidth",
+      "dram_bw",
+      "arithmetic intensity",
+      "global memory",
+      "bandwidth"
+    ],
+    "must_not_cite_as_primary": [
+      "long scoreboard",
+      "dependency chain",
+      "register spill",
+      "occupancy collapse"
+    ]
+  },
+  "misleading_signal": "double-precision elementwise scale halves element count but still streams a 512MB working set",
+  "correct_explanation": "the kernel touches enough double-precision data to saturate DRAM while doing only one multiply per loaded element"
+}

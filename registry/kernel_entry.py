@@ -70,6 +70,7 @@ class KernelEntry:
     ncu_profile: NCUProfile
     task_id: Optional[str]             # original source task_id if mined
     reasoning_rubric: Optional[dict[str, Any]] = None
+    contamination_flag: Optional[bool] = None
 
 
 def ncu_profile_from_dict(data: dict[str, Any]) -> NCUProfile:
@@ -168,6 +169,7 @@ def kernel_entry_from_dict(data: dict[str, Any]) -> KernelEntry:
         reasoning_rubric=dict(data["reasoning_rubric"]) if isinstance(data.get("reasoning_rubric"), dict) else None,
         ncu_profile=ncu_profile_from_dict(dict(data["ncu_profile"])),
         task_id=data.get("task_id"),
+        contamination_flag=data.get("contamination_flag"),
     )
 
 

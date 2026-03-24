@@ -43,3 +43,18 @@ def test_load_results_infers_question_format_from_nested_path(tmp_path: Path) ->
     (path / "hw_A.json").write_text(json.dumps(payload), encoding="utf-8")
     rows = load_results(tmp_path / "results")
     assert rows[0]["question_format"] == "rank"
+
+
+def test_load_results_preserves_judge_payload(tmp_path: Path) -> None:
+    path = tmp_path / "results" / "gpt-5.4" / "trial_1" / "level_1"
+    path.mkdir(parents=True)
+    payload = {
+        "kernel_id": "hw_A",
+        "model": "gpt-5.4",
+        "level": 1,
+        "predicted_label": "memory-bound",
+        "judge": {"label_correct": 1, "reasoning_grounded": 1, "mislead_resistant": 1},
+    }
+    (path / "hw_A.json").write_text(json.dumps(payload), encoding="utf-8")
+    rows = load_results(tmp_path / "results")
+    assert rows[0]["judge"]["label_correct"] == 1

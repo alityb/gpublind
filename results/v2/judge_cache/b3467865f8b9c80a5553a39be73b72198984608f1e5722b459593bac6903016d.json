@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies register-spill as the bottleneck, cites specific evidence (608 floats of local arrays, 2,432 registers exceeding the 255-register hardware limit, specific array sizes, `__launch_bounds__` annotation), correctly attributes the cause to excessive live state and local memory spills rather than the misleading DRAM saturation signal, and the HIGH confidence is justified given the correct diagnosis.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

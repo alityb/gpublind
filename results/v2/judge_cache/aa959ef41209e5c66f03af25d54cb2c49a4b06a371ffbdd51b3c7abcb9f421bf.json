@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies latency-bound behavior, cites specific metric values (84.0% long scoreboard stalls, 0.0% DRAM BW utilization, 100% L2 hit rate), correctly frames memory bandwidth/global memory as non-primary causes while attributing stalls to L2 access latency and dependency chains, and the HIGH confidence is warranted given the correct diagnosis.",
+  "judge_model": "claude-sonnet-4-6"
+}

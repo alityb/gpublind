@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_032",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis is essentially a stub/placeholder file with no actual CUDA kernel implementation. It references \"KernelBench candidate 32\" which relates to the KernelBench benchmark suite (specifically the ConvolutionalVisionTransformer task), but the kernel itself is just a `main()` function with a TODO comment and no real computation. There is no actual CUDA kernel code here to have seen before \u2014 it's an empty harness template."
+}

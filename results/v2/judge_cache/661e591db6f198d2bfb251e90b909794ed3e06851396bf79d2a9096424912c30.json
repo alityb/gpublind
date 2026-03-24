@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The response incorrectly identifies the bottleneck as occupancy-limited instead of the true bottleneck of register-spill, leading to a high confidence error.",
+  "judge_model": "openai/gpt-4o-mini"
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM correctly identified the latency-bound bottleneck with high confidence, cited specific metric values (33.4% Long Scoreboard stalls, 0.0% DRAM utilization, 58% occupancy), and correctly attributed the root cause to scoreboard stalls from dependent memory operations rather than primarily blaming global memory bandwidth.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

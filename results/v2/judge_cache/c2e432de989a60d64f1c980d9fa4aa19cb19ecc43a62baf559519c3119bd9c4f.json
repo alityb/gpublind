@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy-limited as the bottleneck with HIGH confidence, cites specific metric values (12.3% achieved occupancy, 7.8% DRAM utilization, 0.46 FLOP/byte) and concrete code patterns (64 KB shared memory, 192 thread block size, 32 registers/thread) as evidence, and correctly avoids blaming memory bandwidth saturation as the primary cause despite the low arithmetic intensity signal.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

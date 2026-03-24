@@ -1,0 +1,25 @@
+{
+  "id": "hw_mem_02",
+  "source": "handwritten",
+  "true_bottleneck": "memory-bound",
+  "difficulty": "easy",
+  "category": "memory-bound",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "dram bandwidth",
+      "dram_bw",
+      "arithmetic intensity",
+      "global memory",
+      "bandwidth"
+    ],
+    "must_not_cite_as_primary": [
+      "long scoreboard",
+      "dependency chain",
+      "register spill",
+      "occupancy collapse"
+    ]
+  },
+  "misleading_signal": "vector add streams two large inputs and one output with no data reuse",
+  "correct_explanation": "two reads and one write per element produce a textbook bandwidth-bound streaming kernel on large vectors"
+}

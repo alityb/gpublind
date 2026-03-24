@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies memory-bound as the bottleneck with HIGH confidence, cites specific metric values (110.4% DRAM BW, 0.11 FLOP/byte AI, 83.7% stalls), correctly attributes high scoreboard stalls as a consequence rather than a primary cause, and appropriately distinguishes bandwidth saturation from latency-bound scenarios without misattributing the bottleneck to the misleading signal.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies register-spill as the bottleneck, cites specific evidence (544 floats of local arrays, 255 register limit, `__launch_bounds__` annotation), avoids blaming the misleading streaming/FIR signal as primary cause, and appropriately assigns HIGH confidence to a correct diagnosis.",
+  "judge_model": "claude-sonnet-4-6"
+}

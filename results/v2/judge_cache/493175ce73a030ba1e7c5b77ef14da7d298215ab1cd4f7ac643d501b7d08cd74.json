@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies latency-bound as the bottleneck, cites specific metric values (34.2% long scoreboard stalls, 0% DRAM BW utilization, 59% occupancy), correctly attributes the root cause to instruction-level latency/dependency stalls rather than global memory bandwidth, and appropriately dismisses the misleading memory-bound signal with high confidence that proves justified.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

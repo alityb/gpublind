@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_012",
+  "model": "claude-opus-4-6",
+  "seen_before": true,
+  "source_guess": "This is a stub/placeholder generated from **KernelBench** (specifically task 12, VGG19). The comment explicitly references \"KernelBench candidate 12: 12_VGG19\" and follows the KernelBench framework pattern of generating CUDA harnesses from PyTorch model references. However, this is just an empty template/placeholder \u2014 it contains no actual kernel implementation, only a TODO comment and a synchronization call.",
+  "raw_response": "SEEN_BEFORE: YES\nSOURCE: This is a stub/placeholder generated from **KernelBench** (specifically task 12, VGG19). The comment explicitly references \"KernelBench candidate 12: 12_VGG19\" and follows the KernelBench framework pattern of generating CUDA harnesses from PyTorch model references. However, this is just an empty template/placeholder \u2014 it contains no actual kernel implementation, only a TODO comment and a synchronization call."
+}

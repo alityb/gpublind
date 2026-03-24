@@ -1,0 +1,23 @@
+{
+  "id": "hw_reg_04",
+  "source": "handwritten",
+  "true_bottleneck": "register-spill",
+  "misleading_signal": "hw_reg_04 looks like a dense filter, but the real bottleneck is excessive live state forcing spills to local memory",
+  "correct_explanation": "the kernel carries so much live state that register pressure triggers spilling and local-memory latency",
+  "difficulty": "medium",
+  "category": "register-spill",
+  "hardware": "A10G",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "register",
+      "spill",
+      "local memory",
+      "register pressure"
+    ],
+    "must_not_cite_as_primary": [
+      "dram saturation",
+      "occupancy collapse",
+      "shared memory pressure"
+    ]
+  }
+}

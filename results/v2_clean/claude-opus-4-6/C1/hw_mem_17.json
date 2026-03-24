@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_mem_17",
+  "model": "claude-opus-4-6",
+  "condition": "C1",
+  "condition_name": "metrics_only",
+  "true_bottleneck": "memory-bound",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "The arithmetic intensity is 0.00 FLOP/byte, far below the ridge point of 62 FLOP/byte, indicating the kernel performs negligible computation relative to memory traffic. DRAM bandwidth utilization is 74.3% of peak, which is high (>50%) and confirms that the kernel is actively saturating the memory subsystem. Although long scoreboard stalls are extremely high at 95.3%, this is consistent with a memory-bound kernel where warps are stalled waiting for memory requests to return \u2014 the high DRAM utilization distinguishes this from a latency-bound scenario where stalls occur but the memory system is underutilized. The 100% L2 hit rate combined with high DRAM utilization suggests heavy traffic flowing through the memory hierarchy, and the 100% global load efficiency indicates coalesced access patterns, meaning the bottleneck is raw bandwidth capacity rather than inefficient access.",
+  "correct": true,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: The arithmetic intensity is 0.00 FLOP/byte, far below the ridge point of 62 FLOP/byte, indicating the kernel performs negligible computation relative to memory traffic. DRAM bandwidth utilization is 74.3% of peak, which is high (>50%) and confirms that the kernel is actively saturating the memory subsystem. Although long scoreboard stalls are extremely high at 95.3%, this is consistent with a memory-bound kernel where warps are stalled waiting for memory requests to return \u2014 the high DRAM utilization distinguishes this from a latency-bound scenario where stalls occur but the memory system is underutilized. The 100% L2 hit rate combined with high DRAM utilization suggests heavy traffic flowing through the memory hierarchy, and the 100% global load efficiency indicates coalesced access patterns, meaning the bottleneck is raw bandwidth capacity rather than inefficient access.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the bottleneck of a CUDA kernel on NVIDIA A10G given\nthese hardware performance counters. You will NOT see the source.\n\nArithmetic Intensity: 0.00 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 85.0%\nDRAM Bandwidth Utilization: 74.3% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 95.3% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 18\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 1,
+    "stage_2_rvr": 1,
+    "stage_3_mpr": 1,
+    "confidence_calibrated": 1,
+    "explanation": "The response correctly identifies the memory-bound bottleneck with HIGH confidence, cites specific metric values (0.00 FLOP/byte arithmetic intensity, 74.3% DRAM bandwidth utilization, 95.3% stall rate), and correctly attributes the primary cause to sustained DRAM bandwidth saturation rather than the misleading mixed access pattern signal, while appropriately contextualizing the high scoreboard stalls as a symptom of memory-boundedness rather than the root cause.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

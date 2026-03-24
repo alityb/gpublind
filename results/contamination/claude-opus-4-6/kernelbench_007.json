@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_007",
+  "model": "claude-opus-4-6",
+  "seen_before": true,
+  "source_guess": "This appears to be a stub/placeholder generated from the **KernelBench** benchmark suite (specifically problem 7, which corresponds to GoogLeNet/Inception V1). KernelBench is a known benchmark for evaluating GPU kernel implementations. However, this is just an empty harness/template with no actual kernel code \u2014 it's a placeholder that prints \"TODO\" and does nothing meaningful.",
+  "raw_response": "SEEN_BEFORE: YES\nSOURCE: This appears to be a stub/placeholder generated from the **KernelBench** benchmark suite (specifically problem 7, which corresponds to GoogLeNet/Inception V1). KernelBench is a known benchmark for evaluating GPU kernel implementations. However, this is just an empty harness/template with no actual kernel code \u2014 it's a placeholder that prints \"TODO\" and does nothing meaningful."
+}

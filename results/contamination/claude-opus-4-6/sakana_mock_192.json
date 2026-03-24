@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_192",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/handcrafted microbenchmark rather than something from a known tutorial, benchmark suite, or public codebase. The specific characteristics \u2014 magic constants like 17, 257, 4095 (masking to stay within a 4096-element buffer), the arbitrary multiply-accumulate loop with factor 1.1f, and the strided access patterns \u2014 look like they were deliberately constructed to test specific memory access behaviors (e.g., cache thrashing, bank conflicts) or to serve as a toy example for performance analysis. It doesn't match any well-known benchmark (e.g., Rodinia, Parboil, SHOC) or standard CUDA tutorial code."
+}

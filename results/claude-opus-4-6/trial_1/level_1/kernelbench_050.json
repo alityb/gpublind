@@ -1,0 +1,32 @@
+{
+  "kernel_id": "kernelbench_050",
+  "model": "claude-opus-4-6",
+  "trial": 1,
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "occupancy-limited",
+  "correct_explanation": "multiple large matrix-style operators dominate arithmetic work and likely exceed the roofline ridge point",
+  "predicted_label": "latency-bound",
+  "correct": false,
+  "severity": 1,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: latency-bound\nREASONING: This kernel contains no actual GPU computation\u2014it only calls `cudaDeviceSynchronize()` and `std::puts()`, meaning all execution time is spent on host-side API call latency and synchronization overhead with zero useful work dispatched to the GPU. There are no kernel launches, no memory transfers, and no compute operations, so the bottleneck is purely the latency of the host-side calls and the CUDA runtime synchronization barrier. Any profiling would show idle GPU time dominated by launch/sync latency.",
+  "parsed_reasoning": "This kernel contains no actual GPU computation\u2014it only calls `cudaDeviceSynchronize()` and `std::puts()`, meaning all execution time is spent on host-side API call latency and synchronization overhead with zero useful work dispatched to the GPU. There are no kernel launches, no memory transfers, and no compute operations, so the bottleneck is purely the latency of the host-side calls and the CUDA runtime synchronization barrier. Any profiling would show idle GPU time dominated by launch/sync latency.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n#include <cuda_runtime.h>\n#include <cstdio>\n\n// KernelBench candidate 50: 50_ReLUSelfAttention\nint main() {\n  // Standalone profiling harness template generated from KernelBench PyTorch reference.\n  // TODO: materialize Q/K/V tensors and call a fused attention kernel.\n  cudaDeviceSynchronize();\n  std::puts(\"TODO: fill in generated harness before profiling.\");\n  return 0;\n}\n\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T19:06:36.171716+00:00",
+  "judge": {
+    "label_correct": 0,
+    "reasoning_grounded": 1,
+    "mislead_resistant": 1,
+    "explanation": "The model correctly identified that the stub kernel does no real GPU work, but labeled it \"latency-bound\" rather than the true label \"occupancy-limited,\" though its reasoning accurately describes the empty harness with specific code evidence.",
+    "judge_model": "claude-sonnet-4-6"
+  }
+}

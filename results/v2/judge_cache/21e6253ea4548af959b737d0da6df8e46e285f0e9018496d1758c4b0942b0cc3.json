@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM diagnosed \"latency-bound\" instead of the true \"occupancy-limited\" bottleneck, failing Stage 1, but appropriately expressed only MEDIUM confidence for an incorrect diagnosis, earning calibration credit.",
+  "judge_model": "claude-sonnet-4-6"
+}

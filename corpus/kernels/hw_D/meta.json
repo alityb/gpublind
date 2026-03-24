@@ -1,0 +1,20 @@
+{
+  "id": "hw_D",
+  "source": "handwritten",
+  "true_bottleneck": "occupancy-limited",
+  "misleading_signal": "the kernel appears memory-bound because the measured arithmetic intensity is low, but the real constraint is occupancy collapse from the large shared-memory allocation",
+  "correct_explanation": "large shared-memory tiles collapse occupancy and leave too few warps to hide latency",
+  "difficulty": "hard",
+  "category": "occupancy-limited",
+  "reasoning_rubric": {
+    "must_cite_one_of": [
+      "sm__warps_active.avg.pct_of_peak_sustained_active",
+      "launch__shared_mem_per_block"
+    ],
+    "must_not_cite_as_primary": [
+      "low arithmetic intensity alone",
+      "memory-bound classification"
+    ]
+  },
+  "hardware": "A10G"
+}

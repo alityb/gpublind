@@ -1,0 +1,25 @@
+{
+  "kernel_id": "sakana_mock_072",
+  "model": "gpt-5.4",
+  "trial": 1,
+  "level": 1,
+  "question_format": "label",
+  "true_bottleneck": "memory-bound",
+  "correct_explanation": null,
+  "predicted_label": "memory-bound",
+  "correct": true,
+  "severity": 0,
+  "fell_for_adversarial": null,
+  "cited_misleading_signal": null,
+  "raw_response": "BOTTLENECK: memory-bound\nREASONING: Each thread performs several global loads with poor coalescing: both `y[(i*17)&4095]` and `x[(i + j*257)&4095]` create strided/wrapped accesses that cause nearby threads to touch scattered addresses. The arithmetic work is small relative to this memory traffic, so execution is dominated by inefficient global memory access rather than compute.",
+  "parsed_reasoning": "Each thread performs several global loads with poor coalescing: both `y[(i*17)&4095]` and `x[(i + j*257)&4095]` create strided/wrapped accesses that cause nearby threads to touch scattered addresses. The arithmetic work is small relative to this memory traffic, so execution is dominated by inefficient global memory access rather than compute.",
+  "parsed_ranking": null,
+  "parsed_assessment": null,
+  "suggested_change": null,
+  "expected_improvement": null,
+  "prompt_rendered": {
+    "system": "You are a GPU performance engineer.\nFollow the user's requested output format exactly.\n\nValid bottleneck labels: memory-bound, compute-bound, latency-bound,\noccupancy-limited, register-spill",
+    "user": "Diagnose the primary performance bottleneck \nin this CUDA kernel:\n\n```cuda\n__global__ void kernel(float* x, const float* y) { int i = blockIdx.x * blockDim.x + threadIdx.x; float v = y[(i * 17) & 4095]; for (int j = 0; j < 8; ++j) { v = v * 1.1f + x[(i + j * 257) & 4095]; } x[i] = v; }\n```\n\nWhat is the primary performance bottleneck? Use exactly this format:\nBOTTLENECK: <label>\nREASONING: <2-3 sentences>"
+  },
+  "timestamp": "2026-03-23T18:59:29.012272+00:00"
+}

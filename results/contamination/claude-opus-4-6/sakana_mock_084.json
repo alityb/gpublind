@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_084",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/toy benchmark kernel, likely hand-crafted to test memory access patterns or micro-benchmarking behavior. The specific magic numbers (17, 4095, 8, 257, 1.1f) and the particular pattern of strided reads with masking (`& 4095`) don't match any well-known benchmark, tutorial, or open-source codebase I can identify. It looks like something someone wrote to experiment with cache behavior or instruction-level parallelism rather than something from a published source."
+}

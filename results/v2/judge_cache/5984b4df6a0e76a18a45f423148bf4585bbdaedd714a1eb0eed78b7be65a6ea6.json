@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM identified the bottleneck as \"latency-bound\" rather than the true bottleneck of \"register-spill,\" and despite providing reasonable reasoning about local memory spills and scoreboard stalls, the top-level label mismatch fails Stage 1, while the HIGH confidence on an incorrect answer results in an overconfident error penalty.",
+  "judge_model": "claude-sonnet-4-6"
+}

@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM misidentified the bottleneck as occupancy-limited rather than register-spill, and did so with HIGH confidence despite being wrong, making it both incorrect on the diagnosis and overconfident in its error.",
+  "judge_model": "claude-sonnet-4-6"
+}

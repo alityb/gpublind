@@ -72,6 +72,8 @@ Profiling data:
         user_template="""Diagnose the primary performance bottleneck
 in this CUDA kernel using the full profiler output.
 
+Hardware: {{ hardware_context }}
+
 NCU Profile:
 {{ ncu_json }}
 

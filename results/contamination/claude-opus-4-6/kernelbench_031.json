@@ -1,0 +1,7 @@
+{
+  "kernel_id": "kernelbench_031",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis is essentially a stub/placeholder file with no actual CUDA kernel implementation. It references \"KernelBench candidate 31: 31_VisionAttention\" which suggests it's related to the **KernelBench** benchmark suite, but the kernel itself is just a TODO template with no meaningful code \u2014 it doesn't contain any actual kernel logic, just a `main()` that prints a TODO message. There's nothing here that constitutes a real kernel to have \"seen before.\""
+}

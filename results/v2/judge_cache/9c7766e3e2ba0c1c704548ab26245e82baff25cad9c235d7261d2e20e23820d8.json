@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies memory-boundedness, cites specific metric values (98.9% DRAM BW, 0.25 FLOP/byte, 98.3% scoreboard stalls), and correctly demotes the high scoreboard stall percentage to a symptom of memory saturation rather than treating it as the primary bottleneck, with appropriately HIGH confidence matching the correct diagnosis.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_078",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/hand-crafted microbenchmark rather than something from a known benchmark suite, tutorial, or public codebase. The specific characteristics \u2014 the arbitrary prime-number strides (17, 257), the masking with `& 4095` to wrap indices within a 4KB range, the hardcoded loop of 8 iterations with a multiply-add accumulation using 1.1f \u2014 look like someone deliberately constructed a small test kernel to explore memory access patterns, cache behavior, or arithmetic throughput. It doesn't match any well-known benchmark (e.g., Rodinia, Parboil, SHOC) or common CUDA tutorial examples."
+}

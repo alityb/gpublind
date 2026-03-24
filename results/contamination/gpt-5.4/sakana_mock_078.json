@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_078",
+  "model": "gpt-5.4",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO  \nSOURCE: UNKNOWN\n\nThis looks like a small synthetic/custom CUDA kernel using arbitrary constants (`17`, `257`, `4095`, loop of `8`) to create indexed memory accesses and some floating-point work. I don\u2019t recognize it as a standard kernel from a well-known benchmark, CUDA tutorial, or common codebase. It resembles a microbenchmark or handcrafted test more than a canonical published example."
+}

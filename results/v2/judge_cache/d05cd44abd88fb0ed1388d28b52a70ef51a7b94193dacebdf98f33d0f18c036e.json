@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM incorrectly identifies the bottleneck as latency-bound when it is actually occupancy-limited, resulting in a score of 0 for STAGE_1, and the confidence is marked as 1 due to the high confidence in an incorrect diagnosis.",
+  "judge_model": "openai/gpt-4o-mini"
+}

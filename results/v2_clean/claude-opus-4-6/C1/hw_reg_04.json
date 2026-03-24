@@ -1,0 +1,24 @@
+{
+  "kernel_id": "hw_reg_04",
+  "model": "claude-opus-4-6",
+  "condition": "C1",
+  "condition_name": "metrics_only",
+  "true_bottleneck": "register-spill",
+  "predicted_label": "memory-bound",
+  "confidence": "HIGH",
+  "reasoning": "DRAM Bandwidth Utilization is at 109.8% of peak, indicating the kernel is fully saturating memory bandwidth. The arithmetic intensity of 0.05 FLOP/byte is far below the ridge point of 62 FLOP/byte, confirming the workload is heavily memory-bound. The 90.3% Long Scoreboard stalls are consistent with warps waiting on memory requests to return, which is the expected symptom when DRAM utilization is this high \u2014 the stalls are caused by memory bandwidth saturation rather than insufficient latency hiding. While occupancy is low (15.9%) and registers are at the maximum (255), these are secondary concerns since the kernel is already saturating DRAM bandwidth; adding more warps would not increase throughput beyond the memory bandwidth ceiling.",
+  "correct": false,
+  "raw_response": "BOTTLENECK: memory-bound\nCONFIDENCE: HIGH\nREASONING: DRAM Bandwidth Utilization is at 109.8% of peak, indicating the kernel is fully saturating memory bandwidth. The arithmetic intensity of 0.05 FLOP/byte is far below the ridge point of 62 FLOP/byte, confirming the workload is heavily memory-bound. The 90.3% Long Scoreboard stalls are consistent with warps waiting on memory requests to return, which is the expected symptom when DRAM utilization is this high \u2014 the stalls are caused by memory bandwidth saturation rather than insufficient latency hiding. While occupancy is low (15.9%) and registers are at the maximum (255), these are secondary concerns since the kernel is already saturating DRAM bandwidth; adding more warps would not increase throughput beyond the memory bandwidth ceiling.",
+  "prompt": {
+    "system": "You are a GPU performance engineer. Follow the requested format exactly.",
+    "user": "Diagnose the bottleneck of a CUDA kernel on NVIDIA A10G given\nthese hardware performance counters. You will NOT see the source.\n\nArithmetic Intensity: 0.05 FLOP/byte\n  (Ridge point: 62 FLOP/byte \u2014 above=compute-bound tendency,\n   below=memory-bound tendency, but check DRAM utilization)\nAchieved Occupancy: 15.9%\nDRAM Bandwidth Utilization: 109.8% of peak (496 GB/s)\nGlobal Load Efficiency: 100.0%\nStall \u2014 Long Scoreboard: 90.3% of active cycles\nStall \u2014 Memory Dependency: 0.0% of active cycles\nL2 Hit Rate: 100.0%\nRegisters per Thread: 255\n\nWhat is the primary performance bottleneck?\nChoose exactly one label:\n\nmemory-bound: kernel throughput is limited by memory bandwidth\n  (DRAM utilization should be high, >50% of peak)\ncompute-bound: kernel throughput is limited by arithmetic units\n  (arithmetic intensity above ridge point)\nlatency-bound: kernel is stalled waiting for dependent operations\n  (long scoreboard stalls high, DRAM utilization LOW \u2014 distinct\n  from memory-bound)\noccupancy-limited: insufficient active warps to hide latency\n  (achieved occupancy <35%, causing stalls)\nregister-spill: register pressure forces spilling to local memory\n  (register count at max, local memory traffic visible)\n\nBOTTLENECK: <exactly one label>\nCONFIDENCE: <HIGH, MEDIUM, or LOW>\nREASONING: <2-3 sentences citing specific metric values\n            or code patterns as evidence>"
+  },
+  "judge": {
+    "stage_1_drr": 0,
+    "stage_2_rvr": null,
+    "stage_3_mpr": null,
+    "confidence_calibrated": 0,
+    "explanation": "The LLM misidentified the bottleneck as \"memory-bound/DRAM saturation\" instead of the true bottleneck of register spills to local memory, and compounded this with HIGH confidence, making it both wrong and overconfident \u2014 it was deceived by the misleading DRAM utilization signal without recognizing that register pressure and spills to local memory were the root cause driving the apparent memory-bound behavior.",
+    "judge_model": "anthropic/claude-sonnet-4-6"
+  }
+}

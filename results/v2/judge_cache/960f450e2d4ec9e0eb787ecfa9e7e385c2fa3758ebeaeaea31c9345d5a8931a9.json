@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 1,
+  "stage_2_rvr": 1,
+  "stage_3_mpr": 1,
+  "confidence_calibrated": 1,
+  "explanation": "The response correctly identifies occupancy as the bottleneck, backs it with specific quantitative evidence (48 KiB shared memory per block, 2 blocks max per SM, 33% occupancy matching the measured 32.87%), and correctly avoids citing memory bandwidth saturation or dependency chains as the primary cause despite the low arithmetic intensity signal.",
+  "judge_model": "anthropic/claude-sonnet-4-6"
+}

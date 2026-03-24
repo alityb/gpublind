@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM labeled the bottleneck as \"latency-bound\" with HIGH confidence, but the true bottleneck is \"memory-bound,\" making this an overconfident incorrect diagnosis that fails Stage 1 and penalizes calibration.",
+  "judge_model": "claude-sonnet-4-6"
+}

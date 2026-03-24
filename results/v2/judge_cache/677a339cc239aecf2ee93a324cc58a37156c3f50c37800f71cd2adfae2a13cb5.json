@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 0,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"latency-bound\" rather than \"register-spill,\" and expressed HIGH confidence in this wrong diagnosis, making it both wrong on bottleneck identification and overconfident in its error\u2014notably it never mentioned registers, register spilling, or local memory as the true cause of the long scoreboard stalls.",
+  "judge_model": "claude-sonnet-4-6"
+}

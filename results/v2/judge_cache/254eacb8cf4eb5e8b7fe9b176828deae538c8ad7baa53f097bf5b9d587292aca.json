@@ -1,0 +1,8 @@
+{
+  "stage_1_drr": 0,
+  "stage_2_rvr": null,
+  "stage_3_mpr": null,
+  "confidence_calibrated": 1,
+  "explanation": "The LLM incorrectly labeled the bottleneck as \"compute-bound\" instead of \"occupancy-limited\" (ignoring the 43.02% achieved occupancy signal), but appropriately expressed LOW confidence given the ambiguous metrics, earning calibration credit.",
+  "judge_model": "claude-sonnet-4-6"
+}

@@ -1,0 +1,27 @@
+{
+  "needs_profiling": false,
+  "arithmetic_intensity_flop_per_byte": 0.0,
+  "achieved_occupancy_pct": 40.0,
+  "dram_bw_utilization_pct": 0.0,
+  "stall_long_scoreboard_pct": 0.0,
+  "stall_memory_pct": 0.0,
+  "global_load_efficiency_pct": 100.0,
+  "l2_hit_rate_pct": 100.0,
+  "register_count_per_thread": 16,
+  "gpu_time_us": 8.704,
+  "hardware": {
+    "name": "NVIDIA A10G",
+    "peak_bw_gbps": 496.0,
+    "peak_flops_tflops": 30.77,
+    "ridge_point_flop_per_byte": 62.07
+  },
+  "verification": {
+    "roofline_test": "memory-bound",
+    "bandwidth_test": "latency-bound",
+    "stall_test": "memory-bound",
+    "consensus": "memory-bound",
+    "confidence": "medium"
+  },
+  "label_conflict": true,
+  "ncu_says": "memory-bound"
+}

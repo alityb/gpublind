@@ -1,0 +1,7 @@
+{
+  "kernel_id": "sakana_mock_162",
+  "model": "claude-opus-4-6",
+  "seen_before": false,
+  "source_guess": "UNKNOWN",
+  "raw_response": "SEEN_BEFORE: NO\nSOURCE: UNKNOWN\n\nThis kernel appears to be a synthetic/toy microbenchmark, likely hand-crafted to test specific memory access patterns (the `& 4095` masking for circular buffer access, the stride of 17 and 257 which are chosen to create non-trivial access patterns, and the small unrolled loop with a multiply-add chain). It doesn't match any well-known benchmark suite, tutorial, or public codebase that I'm aware of. It looks like something someone might write to experiment with cache behavior or memory throughput characteristics."
+}
